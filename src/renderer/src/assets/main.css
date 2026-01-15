@@ -1,0 +1,6 @@
+@import 'tailwindcss';
+
+/* You can still keep your custom global styles below */
+body {
+  @apply bg-slate-900 text-white; /* Example of using Tailwind in CSS */
+}
