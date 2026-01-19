@@ -1,9 +1,10 @@
+import AuthLayout from '@/layouts/auth.layout'
 import LoginPage from '@/pages/(auth)/login'
 import SignupPage from '@/pages/(auth)/sign-up'
 
 const authRoutes = {
   path: '/',
-  element: <LoginPage />,
+  element: <AuthLayout />,
   children: [
     {
       index: true,
