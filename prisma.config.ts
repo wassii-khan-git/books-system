@@ -6,7 +6,8 @@ import { defineConfig, env } from 'prisma/config'
 export default defineConfig({
   schema: 'prisma/schema.prisma',
   migrations: {
-    path: 'prisma/migrations'
+    path: 'prisma/migrations',
+    seed: 'tsx prisma/script.ts'
   },
   datasource: {
     url: env('DATABASE_URL') // use in-memory database for development
