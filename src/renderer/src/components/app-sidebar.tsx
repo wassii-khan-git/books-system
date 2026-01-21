@@ -30,80 +30,80 @@ const dashboardNavigations = {
   navMain: [
     {
       title: 'Dashboard',
-      url: '/dashboard',
+      url: 'dashboard',
       icon: LayoutDashboard,
       isActive: true
     },
 
     {
       title: 'Categories',
-      url: '/dashboard/categories',
+      url: 'dashboard/categories',
       icon: Layers2,
       isActive: false,
       items: [
         {
           title: 'Add Category',
-          url: '/dashboard/add-category'
+          url: 'dashboard/add-category'
         },
         {
           title: 'All Categories',
-          url: '/dashboard/categories'
+          url: 'dashboard/categories'
         }
       ]
     },
     {
       title: 'Companies',
-      url: '/dashboard/companies',
+      url: 'dashboard/companies',
       icon: Building2,
       isActive: false,
       items: [
         {
           title: 'Add Company',
-          url: '/dashboard/add-company'
+          url: 'dashboard/add-company'
         },
         {
           title: 'All Companies',
-          url: '/dashboard/companies'
+          url: 'dashboard/companies'
         }
       ]
     },
     {
       title: 'Products',
-      url: '/dashboard/products',
+      url: 'dashboard/products',
       icon: ListChecksIcon,
       isActive: false,
       items: [
         {
           title: 'Add Products',
-          url: '/dashboard/add-product'
+          url: 'dashboard/add-product'
         },
         {
           title: 'All Products',
-          url: '/dashboard/products'
+          url: 'dashboard/products'
         }
       ]
     },
     {
       title: 'Orders',
-      url: '/dashboard/orders',
+      url: 'dashboard/orders',
       icon: Box,
       isActive: false
     },
     {
       title: 'Users',
-      url: '/dashboard/users',
+      url: 'dashboard/users',
       icon: Users,
       isActive: false
     },
     {
       title: 'Queries',
-      url: '/dashboard/queries',
+      url: 'dashboard/queries',
       icon: NotepadTextIcon,
       isActive: false
     }
     // {
     //   title: "Settings",
-    //   url: "/dashboard/settings",
+    //   url: "dashboard/settings",
     //   icon: Settings,
     //   isActive: false,
     // },
@@ -124,7 +124,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>): 
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton asChild className="data-[slot=sidebar-menu-button]:p-1.5!">
-              <Link to="/dashboard">
+              <Link to="dashboard">
                 <ArrowUp className="size-5!" />
                 <span className="text-base font-semibold">Books Store.</span>
               </Link>
