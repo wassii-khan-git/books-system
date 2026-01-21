@@ -5,6 +5,8 @@ import { JSX } from 'react'
 import { Outlet } from 'react-router-dom'
 
 export default function DashboardLayout(): JSX.Element {
+  // loading
+
   return (
     <div className="md:ml-72">
       <SidebarProvider
@@ -18,7 +20,7 @@ export default function DashboardLayout(): JSX.Element {
         <AppSidebar variant="inset" className="w-72" />
         <SidebarInset>
           <SiteHeader />
-          <main className="w-full ">
+          <main className="w-full md:max-w-7xl mx-auto">
             <Outlet />
           </main>
         </SidebarInset>
