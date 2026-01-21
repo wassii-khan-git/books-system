@@ -1,30 +1,31 @@
-import DashboardLayout from '@/layouts/dashboard.layout'
+import { lazy } from 'react'
 import HomePage from '@/pages/(admin)/home'
-// import { lazy } from 'react'
-// // pages
-// const DashboardHome = lazy(() => import('../pages/dashboard/home'))
-// const ProductsPage = lazy(() => import('../pages/dashboard/products'))
+import { Navigate } from 'react-router-dom'
+// imports
+const AddCategoryPage = lazy(() => import('@/pages/(admin)/(add-categories)'))
+const CategoriesPage = lazy(() => import('@/pages/(admin)/(categories)'))
 
-const dashboardRoutes = {
-  path: '/',
-  element: <DashboardLayout />,
-  children: [
-    // Dashboard Home Page
-    {
-      index: true,
-      element: <HomePage />
-    },
-    // Dashboard Home Page
-    {
-      path: 'dashboard',
-      element: <HomePage />
-    },
-    // Dashboard Settings Page
-    {
-      path: '/home',
-      element: <HomePage />
-    }
-  ]
-}
+const dashboardRoutes = [
+  {
+    index: true,
+    element: <HomePage />
+  },
+  {
+    path: 'dashboard',
+    element: <HomePage />
+  },
+  {
+    path: 'dashboard/add-category',
+    element: <AddCategoryPage />
+  },
+  {
+    path: 'dashboard/categories',
+    element: <CategoriesPage />
+  },
+  {
+    path: '*',
+    element: <Navigate to="/" replace />
+  }
+]
 
 export default dashboardRoutes

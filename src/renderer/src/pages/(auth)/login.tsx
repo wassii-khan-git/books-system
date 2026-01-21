@@ -18,15 +18,15 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
 import heroImage from '@/assets/hero.jpg'
 import { ResponseTypes } from '../../../../main/types'
-import { SessionService } from '../../../../main/services/session.services'
+import { useAuthStore } from '@/store/auth.slice'
 
 export interface UserTypes {
   id: number
   name: string
   email: string
   password?: string
-  updatedAt: Date
-  createdAt: Date
+  updatedAt?: Date
+  createdAt?: Date
   companies?: []
 }
 
@@ -43,6 +43,9 @@ export function LoginPage(): JSX.Element {
   // navigate
   const navigate = useNavigate()
 
+  // auth
+  const setUser = useAuthStore((state) => state.setUser)
+
   const formSubmit = async ({ email, password }): Promise<void> => {
     console.log('email---', email)
     console.log('password---', password)
@@ -55,8 +58,9 @@ export function LoginPage(): JSX.Element {
       if (response?.success) {
         toast.success('Login Successful')
         form.reset()
+        setUser(response?.data)
         // redirect to dashboard
-        navigate('/dashboard/home')
+        navigate('/dashboard/home', { replace: true })
       } else {
         toast.error(response?.message || 'Failed to send magic link. Please try again.')
       }
