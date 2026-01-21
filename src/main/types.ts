@@ -8,5 +8,5 @@ export type ResponseTypes = {
 
 export type AuthTypes = {
   isAuthenticated: boolean
-  user?: User
+  user: User
 }

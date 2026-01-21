@@ -3,6 +3,7 @@ import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import { usersController } from './controllers/users.controller'
+import { sessionsController } from './controllers/session.controller'
 
 function createWindow(): void {
   // Create the browser window.
@@ -55,6 +56,7 @@ app.whenReady().then(() => {
 
   // init controllers
   usersController()
+  sessionsController()
 
   createWindow()
 

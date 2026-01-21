@@ -16,8 +16,4 @@ export async function usersController(): Promise<void> {
     }
     return response
   })
-  // get session
-  ipcMain.handle('users:get-session', () => {
-    return SessionService.getUser()
-  })
 }
