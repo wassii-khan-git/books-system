@@ -18,7 +18,9 @@ import {
 } from '@/components/ui/sidebar'
 import React, { JSX } from 'react'
 import { LogOut, Settings, User, UserCircleIcon } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import Spinner from './shared/spinner'
+import { useAuthStore } from '@/store/auth.slice'
 
 export function NavUser({
   user
@@ -30,6 +32,16 @@ export function NavUser({
   }
 }): JSX.Element {
   const { isMobile } = useSidebar()
+  // logout
+  const isLoading = useAuthStore((state) => state.isLoading)
+  const logout = useAuthStore((state) => state.logout)
+  // navigate
+  const navigate = useNavigate()
+  // handle logout
+  const handleLogout = (): void => {
+    logout()
+    navigate('/login', { replace: true })
+  }
 
   return (
     <SidebarMenu>
@@ -77,9 +89,9 @@ export function NavUser({
               </Link>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => console.log('Working on this feature')}>
+            <DropdownMenuItem onClick={handleLogout}>
               <LogOut />
-              Log out
+              {isLoading ? <Spinner isPageLoader={false} size={20} /> : 'Log out'}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
