@@ -8,43 +8,39 @@ interface AuthState {
   user: User | null
   setUser: (user: User) => void
   fetchSession: () => Promise<void>
-  logout: () => void
+  logout: () => Promise<void>
 }
 
-export const useAuthStore = create<AuthState>()(
-  persist(
-    (set) => ({
-      isAuthenticated: false,
-      isLoading: true,
-      user: null,
-      setUser: (user) => set({ isAuthenticated: true, user, isLoading: false }),
-      fetchSession: async () => {
-        try {
-          const session = await window.api.getSession()
-          console.log('session---', session)
-          set({ isAuthenticated: true, user: session?.user, isLoading: false })
-        } catch (error) {
-          console.log('Erroro---', error)
-          set({ isAuthenticated: false, user: null, isLoading: false })
-        } finally {
-          set({ isLoading: false })
-        }
-      },
-      logout: async () => {
-        set({ isLoading: true })
-        try {
-          await window.api.logout()
-          set({ isAuthenticated: false, user: null, isLoading: false })
-        } catch (error) {
-          console.log('Errorr--', error)
-          set({ isLoading: false })
-        } finally {
-          set({ isLoading: false })
-        }
+export const useAuthStore = create<AuthState>()((set) => ({
+  isAuthenticated: false,
+  isLoading: true,
+  user: null,
+  setUser: (user) => set({ isAuthenticated: true, user, isLoading: false }),
+  fetchSession: async () => {
+    try {
+      const session = await window.api.getSession()
+      console.log('session---', session)
+      if (session !== null && session !== undefined) {
+        set({ isAuthenticated: true, user: session?.user, isLoading: false })
       }
-    }),
-    {
-      name: 'auth-store'
+    } catch (error) {
+      console.log('Erroro---', error)
+      set({ isAuthenticated: false, user: null, isLoading: false })
+    } finally {
+      set({ isLoading: false })
     }
-  )
-)
+  },
+  logout: async () => {
+    set({ isLoading: true })
+    try {
+      const response = await window.api.logout()
+      console.log('lgoout -- response---', response)
+      set({ isAuthenticated: false, user: null, isLoading: false })
+    } catch (error) {
+      console.log('Errorr--', error)
+      set({ isLoading: false })
+    } finally {
+      set({ isLoading: false })
+    }
+  }
+}))

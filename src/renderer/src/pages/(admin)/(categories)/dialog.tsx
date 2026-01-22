@@ -13,7 +13,6 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
 
 import {
   Form,
@@ -24,7 +23,7 @@ import {
   FormMessage
 } from '@/components/ui/form'
 import { Textarea } from '@/components/ui/textarea'
-import { ChangeEvent, useEffect, useState } from 'react'
+import { JSX, useEffect, useState } from 'react'
 import { Category } from './columns'
 import Spinner from '@/components/shared/spinner'
 
@@ -42,57 +41,34 @@ export default function CategoryDialog({
   category,
   onSave,
   action
-}: EditCategoryDialogProps) {
+}: EditCategoryDialogProps): JSX.Element {
   // form
   const form = useForm({
     defaultValues: {
       title: category?.title,
-      description: category?.desc
+      description: category?.description
     }
   })
-  // has new Image
-  const [hasNewImage, setHasNewImage] = useState<boolean>(false)
 
   const [loading, setLoading] = useState<boolean>(false)
 
-  // preview state
-  const [preview, setPreview] = useState<string>('')
   // submit button
   const submitButtonText = action === 'edit' ? 'Save' : 'Yes'
 
   // For update
-  const handleUpdate = async (values) => {
+  const handleUpdate = async (values): Promise<void> => {
     console.log('values: ', values)
-    const { image, description, ...rest } = values
-    console.log('image:', image)
-
-    // form
-    let imageFileString: string | File
-    //  if its file
-    if (hasNewImage && values.image instanceof File) {
-      imageFileString = values.image
-    } else if (category?.img) {
-      imageFileString = category.img
-    } else {
-      imageFileString = ''
-    }
 
     const data = {
-      ...rest,
-      id: category?.id as string,
-      desc: description,
-      img: imageFileString
+      ...values,
+      id: category?.id as string
     }
 
-    const formData = new FormData()
-    formData.set('title', data.title)
-    formData.set('slug', data.slug)
-    formData.set('desc', data.desc)
-    formData.set('image', data.img)
+    console.log('data--', data)
 
     try {
       // call update action
-      const result = await window.api?.updateCategory(formData)
+      const result = await window.api?.updateCategory(data)
       console.log('result: ', result)
       // call on save
       onSave({ success: result.success, message: result.message })
@@ -101,65 +77,36 @@ export default function CategoryDialog({
     }
   }
   // For delete
-  const handeDelete = async () => {
+  const handeDelete = async (id: number): Promise<void> => {
     // data
+    console.log('iddd in delete---', id)
+
     try {
       setLoading(true)
       // call delete action
-      const result = await window.api?.deleteCategory(
-        category?.id as string,
-        category?.imgPublicId as string
-      )
+      const result = await window.api?.deleteCategory(id)
       console.log('result: ', result)
-      onSave({ success: result.success, message: result.message })
+      onSave({ success: result.success, message: result.message, data: result.data })
     } catch (error) {
       console.log('Error:', error)
       setLoading(false)
     }
   }
 
-  // handle image
-  const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (file) {
-      form.setValue('image', file)
-      setHasNewImage(true)
-      // update the state
-      const reader = new FileReader()
-      reader.onloadend = () => {
-        setPreview(reader.result as string)
-      }
-      return reader.readAsDataURL(file)
-    }
-  }
-
-  // Auto-generate slug from title
-  const watchedTitle = form.watch('title')
-
-  useEffect(() => {
-    if (watchedTitle) {
-      const slug = watchedTitle
-        .toLowerCase()
-        .replace(/[^a-z0-9\s-]/g, '')
-        .replace(/\s+/g, '-')
-        .trim()
-      form.setValue('slug', slug)
-    }
-  }, [watchedTitle, form])
-
   useEffect(() => {
     if (open) {
-      setPreview(category?.img as string)
-      setLoading(false)
       form.reset()
+      setLoading(false)
     }
-  }, [open, category?.img, form])
+  }, [open, form])
 
-  const handleDialogClose = () => {
+  const handleDialogClose = (): void => {
     form.reset()
-    setPreview('')
     onOpenChange(false)
   }
+
+  console.log('cagtegory-=--', category)
+  console.log('Aciton---', action)
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -174,43 +121,26 @@ export default function CategoryDialog({
             {action === 'edit' ? (
               <div className="space-y-4 md:space-y-8 mb-2 md:mb-8">
                 {/* Basic Information */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <FormField
-                    control={form.control}
-                    name="title"
-                    defaultValue={category?.title}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Title *</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Enter category title" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="slug"
-                    defaultValue={category?.slug}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Slug *</FormLabel>
-                        <FormControl>
-                          <Input placeholder="category-slug" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
+                <FormField
+                  control={form.control}
+                  name="title"
+                  defaultValue={category?.title}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Title *</FormLabel>
+                      <FormControl>
+                        <Input className="mt-2" placeholder="Enter category title" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
                 {/* Description */}
                 <FormField
                   control={form.control}
                   name="description"
-                  defaultValue={category?.desc}
+                  defaultValue={category?.description}
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Description *</FormLabel>
@@ -225,60 +155,35 @@ export default function CategoryDialog({
                     </FormItem>
                   )}
                 />
-
-                {/* Image Upload */}
-                <FormField
-                  control={form.control}
-                  name="image"
-                  defaultValue={category?.img}
-                  render={({ field: { value, onChange, ...fieldProps } }) => {
-                    void value // Intentionally unused
-                    void onChange // Intentionally unused
-                    return (
-                      <FormItem>
-                        <FormLabel>Image *</FormLabel>
-                        <FormControl>
-                          <Input
-                            {...fieldProps}
-                            type="file"
-                            accept="image/jpeg,image/jpg,image/png,image/webp"
-                            onChange={handleImageChange}
-                            className="cursor-pointer"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                        {preview && (
-                          <div className="mt-2">
-                            <img
-                              width={120}
-                              height={80}
-                              src={preview}
-                              alt="Preview"
-                              className="rounded border"
-                            />
-                          </div>
-                        )}
-                      </FormItem>
-                    )
-                  }}
-                />
               </div>
             ) : (
-              action === 'delete' && <h3>Are your sure your want to delete this record ?</h3>
+              action === 'delete' && (
+                <h3>
+                  Are your sure your want to delete{' '}
+                  <span className="font-bold">{category?.title}</span> record ?
+                </h3>
+              )
             )}
 
             <Separator className="mt-6 mb-5" />
             <DialogFooter>
               <div className="flex justify-end gap-2 items-center">
-                <Button type="button" variant="outline" onClick={handleDialogClose} className="">
+                <Button size="sm" type="button" variant="outline" onClick={handleDialogClose}>
                   Cancel
                 </Button>
                 <Button
+                  size="sm"
                   disabled={form.formState.isSubmitting}
                   type={action === 'edit' ? 'submit' : 'button'}
                   variant={action === 'edit' ? 'default' : 'destructive'}
-                  onClick={() => action !== 'edit' && handeDelete()}
-                  className="flex bg-indigo-500 hover:bg-indigo-400 "
+                  onClick={() => {
+                    if (action === 'edit') {
+                      handleUpdate()
+                    } else if (action === 'delete') {
+                      handeDelete(category?.id as number)
+                    }
+                  }}
+                  className="flex bg-primary hover:bg-primary "
                 >
                   {loading || form.formState.isSubmitting ? (
                     <Spinner isPageLoader={false} size={22} className="text-white" />
