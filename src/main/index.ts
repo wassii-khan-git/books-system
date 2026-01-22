@@ -4,6 +4,7 @@ import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import { usersController } from './controllers/users.controller'
 import { sessionsController } from './controllers/session.controller'
+import { categoriesController } from './controllers/categories.controller'
 
 function createWindow(): void {
   // Create the browser window.
@@ -55,8 +56,9 @@ app.whenReady().then(() => {
   ipcMain.on('ping', () => console.log('pong'))
 
   // init controllers
-  usersController()
   sessionsController()
+  usersController()
+  categoriesController()
 
   createWindow()
 

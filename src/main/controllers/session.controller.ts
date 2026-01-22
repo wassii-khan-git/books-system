@@ -1,7 +1,7 @@
 import { ipcMain } from 'electron'
 import { SessionService } from '../services/session.services'
 
-export async function sessionsController(): Promise<void> {
+export function sessionsController(): void {
   // get session
   ipcMain.handle('user:get-session', () => {
     return SessionService.getUser()
