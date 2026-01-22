@@ -9,17 +9,16 @@ import {
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/button'
-import { Checkbox } from '@/components/ui/checkbox'
 import { MoreVertical, Pen, Trash } from 'lucide-react'
+import { DragHandle } from '@/components/data-table'
 
 // Define the shape of your Category data
 export type Category = {
   id: string // Assuming UUID from Prisma
   title: string
-  slug: string
-  desc: string
-  img?: string | File
-  imgPublicId?: string
+  description: string
+  createdAt?: string
+  updatedAt?: string
 }
 
 interface columnsProps {
@@ -29,45 +28,27 @@ interface columnsProps {
 
 export const getColumns = ({ onEdit, onDelete }: columnsProps): ColumnDef<Category>[] => [
   // Column for Dragging
-  // {
-  //   id: "drag",
-  //   header: () => null,
-  //   cell: ({ row }) => <DragHandle id={row.original.id} />,
-  // },
-  // Column for Row Selection
   {
-    id: 'select',
-    header: ({ table }) => (
-      <Checkbox
-        checked={
-          table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && 'indeterminate')
-        }
-        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Select all"
-      />
-    ),
-    cell: ({ row }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Select row"
-      />
-    ),
-    enableSorting: false,
-    enableHiding: false
+    id: 'drag',
+    header: () => null,
+    cell: ({ row }) => <DragHandle id={row.original.id} />
   },
+  // Column for Row Selection
+
   // Column for Title
   {
     accessorKey: 'title',
     header: 'Title',
     cell: ({ row }) => <div className="font-medium">{row.original.title}</div>
   },
-  // Column for Slug
+
+  // Column for description
   {
-    accessorKey: 'slug',
-    header: 'Slug',
-    cell: ({ row }) => <div className="font-mono">{row.original.slug}</div>
+    accessorKey: 'description',
+    header: 'Description',
+    cell: ({ row }) => <div className="font-medium">{row.original.description}</div>
   },
+
   // Column for Actions
   {
     header: 'Actions',
