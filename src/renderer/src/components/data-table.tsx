@@ -173,7 +173,7 @@ export function DataTable<TData, TValue>({
       pagination
     },
     // FIXED: Replace this line too
-    getRowId: (row: TData) => getRowId(row).toString(),
+    getRowId: (row: TData) => getRowId(row)?.toString(),
     enableRowSelection: true,
     onRowSelectionChange: setRowSelection,
     onSortingChange: setSorting,
