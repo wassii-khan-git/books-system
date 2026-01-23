@@ -36,6 +36,7 @@ model Company {
   id    Int    @id @default(autoincrement())
   name  String 
   categoryId Int
+  percentage Int
   // relations
   category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   updatedAt DateTime @updatedAt

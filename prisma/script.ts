@@ -11,6 +11,16 @@ async function main(): Promise<void> {
   })
   console.log('Created user:', user)
 
+  // seed 20 categories record
+  for (let i = 0; i < 20; i++) {
+    await prisma.category.create({
+      data: {
+        title: `Category ${i + 1}`,
+        description: `Description for category ${i + 1}`
+      }
+    })
+  }
+
   // Fetch all users with their
   const allUsers = await prisma.user.findMany({})
   console.log('All users:', JSON.stringify(allUsers, null, 2))
