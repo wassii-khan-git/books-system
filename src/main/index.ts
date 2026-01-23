@@ -6,14 +6,21 @@ import { usersController } from './controllers/users.controller'
 import { sessionsController } from './controllers/session.controller'
 import { categoriesController } from './controllers/categories.controller'
 
+let mainWindow: BrowserWindow | null = null
+
 function createWindow(): void {
   // Create the browser window.
-  const mainWindow = new BrowserWindow({
-    width: 900,
-    height: 670,
+  mainWindow = new BrowserWindow({
+    width: 1200,
+    height: 760,
+    minWidth: 1200,
+    minHeight: 760,
     show: false,
     autoHideMenuBar: true,
+    frame: false,
+    backgroundColor: '#f5f7fb',
     ...(process.platform === 'linux' ? { icon } : {}),
+    ...(process.platform === 'darwin' ? { titleBarStyle: 'hidden' } : {}),
     webPreferences: {
       preload: join(__dirname, '../preload/index.mjs'),
       sandbox: false
@@ -22,6 +29,14 @@ function createWindow(): void {
 
   mainWindow.on('ready-to-show', () => {
     mainWindow.show()
+  })
+
+  mainWindow.on('enter-full-screen', () => {
+    mainWindow?.webContents.send('window:fullscreen-changed', true)
+  })
+
+  mainWindow.on('leave-full-screen', () => {
+    mainWindow?.webContents.send('window:fullscreen-changed', false)
   })
 
   mainWindow.webContents.setWindowOpenHandler((details) => {
@@ -54,6 +69,25 @@ app.whenReady().then(() => {
 
   // IPC test
   ipcMain.on('ping', () => console.log('pong'))
+  ipcMain.handle('window:minimize', (event) => {
+    const win = BrowserWindow.fromWebContents(event.sender)
+    win?.minimize()
+  })
+  ipcMain.handle('window:close', (event) => {
+    const win = BrowserWindow.fromWebContents(event.sender)
+    win?.close()
+  })
+  ipcMain.handle('window:toggle-fullscreen', (event) => {
+    const win = BrowserWindow.fromWebContents(event.sender)
+    if (!win) return false
+    const nextState = !win.isFullScreen()
+    win.setFullScreen(nextState)
+    return nextState
+  })
+  ipcMain.handle('window:is-fullscreen', (event) => {
+    const win = BrowserWindow.fromWebContents(event.sender)
+    return win?.isFullScreen() ?? false
+  })
 
   // init controllers
   sessionsController()

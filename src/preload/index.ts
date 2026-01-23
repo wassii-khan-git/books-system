@@ -15,7 +15,19 @@ const api = {
   getCategories: () => ipcRenderer.invoke('get-categories'),
   addCategory: (data: AddCategoryTypes) => ipcRenderer.invoke('add-category', data),
   updateCategory: (data: AddCategoryTypes) => ipcRenderer.invoke('update-category', data),
-  deleteCategory: (id: number) => ipcRenderer.invoke('delete-category', id)
+  deleteCategory: (id: number) => ipcRenderer.invoke('delete-category', id),
+  // window controls
+  minimizeWindow: () => ipcRenderer.invoke('window:minimize'),
+  closeWindow: () => ipcRenderer.invoke('window:close'),
+  toggleFullScreen: () => ipcRenderer.invoke('window:toggle-fullscreen'),
+  isFullScreen: () => ipcRenderer.invoke('window:is-fullscreen'),
+  onFullScreenChange: (callback: (isFullScreen: boolean) => void): (() => void) => {
+    const listener = (_event, isFullScreen: boolean) => callback(isFullScreen)
+    ipcRenderer.on('window:fullscreen-changed', listener)
+    return () => {
+      ipcRenderer.removeListener('window:fullscreen-changed', listener)
+    }
+  }
 }
 
 // Use `contextBridge` APIs to expose Electron APIs to

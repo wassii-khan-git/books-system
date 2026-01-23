@@ -18,6 +18,12 @@ declare global {
       addCategory: (data: AddCategoryTypes) => Promise<ResponseTypes>
       updateCategory: (data: AddCategoryTypes) => Promise<ResponseTypes>
       deleteCategory: (id: number) => Promise<ResponseTypes>
+      // window controls
+      minimizeWindow: () => Promise<void>
+      closeWindow: () => Promise<void>
+      toggleFullScreen: () => Promise<boolean>
+      isFullScreen: () => Promise<boolean>
+      onFullScreenChange: (callback: (isFullScreen: boolean) => void) => () => void
     }
   }
 }

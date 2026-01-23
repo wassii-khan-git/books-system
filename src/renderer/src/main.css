@@ -2,6 +2,14 @@
 
 @custom-variant dark (&:is(.dark *));
 
+@font-face {
+  font-family: 'Space Grotesk';
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url('./assets/fonts/space-grotesk-latin.woff2') format('woff2');
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -36,67 +44,71 @@
 }
 
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  /* custom colors */
-  --primary: oklch(58.5% 0.233 277.117);
-  --primary-foreground: oklch(0.985 0 0);
-
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.985 0 0);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --radius: 0.5rem;
-  --sidebar: hsl(0 0% 98%);
-  --sidebar-foreground: hsl(240 5.3% 26.1%);
-  --sidebar-primary: hsl(240 5.9% 10%);
-  --sidebar-primary-foreground: hsl(0 0% 98%);
-  --sidebar-accent: hsl(240 4.8% 95.9%);
-  --sidebar-accent-foreground: hsl(240 5.9% 10%);
-  --sidebar-border: hsl(220 13% 91%);
-  --sidebar-ring: hsl(217.2 91.2% 59.8%);
+  --background: #f5f7fb;
+  --foreground: #0f172a;
+  --card: #ffffff;
+  --card-foreground: #0f172a;
+  --popover: #ffffff;
+  --popover-foreground: #0f172a;
+  --primary: #5c5eb4;
+  --primary-foreground: #f0fff7;
+  --secondary: #eef2f6;
+  --secondary-foreground: #1f2937;
+  --muted: #f1f5f9;
+  --muted-foreground: #64748b;
+  --accent: #e7f5ee;
+  --accent-foreground: #0f172a;
+  --destructive: #dc2626;
+  --destructive-foreground: #fff1f2;
+  --border: #e2e8f0;
+  --input: #e2e8f0;
+  --ring: #16a34a;
+  --radius: 0.75rem;
+  --sidebar: #f8fafc;
+  --sidebar-foreground: #1f2937;
+  --sidebar-primary: #6366f1;
+  --sidebar-primary-foreground: #f0fff7;
+  --sidebar-accent: #e6f2ec;
+  --sidebar-accent-foreground: #0f172a;
+  --sidebar-border: #e2e8f0;
+  --sidebar-ring: #6366f1;
   --sidebar-width: 288px;
+  --app-gradient-1: rgba(0, 163, 92, 0.12);
+  --app-gradient-2: rgba(59, 130, 246, 0.08);
+  color-scheme: light;
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.145 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.145 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.985 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.396 0.141 25.723);
-  --destructive-foreground: oklch(0.637 0.237 25.331);
-  --border: oklch(0.269 0 0);
-  --input: oklch(0.269 0 0);
-  --ring: oklch(0.439 0 0);
-  --sidebar: hsl(240 5.9% 10%);
-  --sidebar-foreground: hsl(240 4.8% 95.9%);
-  --sidebar-primary: hsl(224.3 76.3% 48%);
-  --sidebar-primary-foreground: hsl(0 0% 100%);
-  --sidebar-accent: hsl(240 3.7% 15.9%);
-  --sidebar-accent-foreground: hsl(240 4.8% 95.9%);
-  --sidebar-border: hsl(240 3.7% 15.9%);
-  --sidebar-ring: hsl(217.2 91.2% 59.8%);
+  --background: #0b0f14;
+  --foreground: #e6edf5;
+  --card: #111821;
+  --card-foreground: #e6edf5;
+  --popover: #111821;
+  --popover-foreground: #e6edf5;
+  --primary: #6366f1;
+  --primary-foreground: #eafff3;
+  --secondary: #17212b;
+  --secondary-foreground: #d5dee9;
+  --muted: #141c26;
+  --muted-foreground: #8ea0b4;
+  --accent: #1b2531;
+  --accent-foreground: #e6edf5;
+  --destructive: #ef4444;
+  --destructive-foreground: #fde2e2;
+  --border: #1f2b38;
+  --input: #1c2632;
+  --ring: #22c55e;
+  --sidebar: #0f141b;
+  --sidebar-foreground: #b7c2d1;
+  --sidebar-primary: #6366f1;
+  --sidebar-primary-foreground: #eafff3;
+  --sidebar-accent: #17202a;
+  --sidebar-accent-foreground: #e6edf5;
+  --sidebar-border: #1b2430;
+  --sidebar-ring: #6366f1;
+  --app-gradient-1: rgba(0, 163, 92, 0.18);
+  --app-gradient-2: rgba(14, 165, 233, 0.14);
+  color-scheme: dark;
 }
 
 @layer base {
@@ -105,5 +117,10 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-family: 'Space Grotesk', 'Segoe UI', sans-serif;
+    background-image:
+      radial-gradient(1200px 700px at 10% -10%, var(--app-gradient-1), transparent 60%),
+      radial-gradient(900px 500px at 90% 0%, var(--app-gradient-2), transparent 55%);
+    background-attachment: fixed;
   }
 }
