@@ -1,6 +1,6 @@
 import { AppSidebar } from '@/components/app-sidebar'
-import { SiteHeader } from '@/components/site-header'
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
+import TitleBar from '@/components/titlebar'
 import { JSX } from 'react'
 import { Outlet } from 'react-router-dom'
 
@@ -19,8 +19,8 @@ export default function DashboardLayout(): JSX.Element {
       >
         <AppSidebar variant="inset" className="w-72" />
         <SidebarInset>
-          <SiteHeader />
-          <main className="w-full md:max-w-7xl mx-auto">
+          <TitleBar />
+          <main className="w-full md:max-w-7xl mx-auto px-4 pb-6">
             <Outlet />
           </main>
         </SidebarInset>
