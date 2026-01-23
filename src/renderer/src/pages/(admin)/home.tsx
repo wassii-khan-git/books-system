@@ -19,18 +19,15 @@ const HomePage = (): JSX.Element => {
   return (
     <div className="w-full">
       <main>
-        <div className="flex flex-1 flex-col">
-          <div className="@container/main flex flex-1 flex-col gap-2">
-            <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
-              <SectionCards
-                totalCustomers={0}
-                totalProducts={123}
-                totalSales={213}
-                newOrders={2523}
-              />
-              {/* Recent activity */}
-              <RecentActivity newCustomers={[]} newOrders={[]} newProducts={[]} />
-            </div>
+        <div className="flex flex-1 flex-col gap-6 py-6">
+          <div className="@container/main flex flex-1 flex-col gap-6">
+            <SectionCards
+              totalCustomers={0}
+              totalProducts={123}
+              totalSales={213}
+              newOrders={2523}
+            />
+            <RecentActivity newCustomers={[]} newOrders={[]} newProducts={[]} />
           </div>
         </div>
       </main>

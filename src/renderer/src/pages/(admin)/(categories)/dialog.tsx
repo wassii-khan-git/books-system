@@ -11,7 +11,6 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { Separator } from '@/components/ui/separator'
 import { useForm } from 'react-hook-form'
 
 import {
@@ -26,6 +25,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { JSX, useEffect, useState } from 'react'
 import { Category } from './columns'
 import Spinner from '@/components/shared/spinner'
+import { Tag, Trash2 } from 'lucide-react'
 
 interface EditCategoryDialogProps {
   open: boolean
@@ -52,8 +52,14 @@ export default function CategoryDialog({
 
   const [loading, setLoading] = useState<boolean>(false)
 
+  const isDelete = action === 'delete'
+  const dialogTitle = isDelete ? 'Delete Category' : 'Update Category'
+  const dialogDescription = isDelete
+    ? 'This action permanently removes the category and cannot be undone.'
+    : 'Refine the category name and description for your library.'
+
   // submit button
-  const submitButtonText = action === 'edit' ? 'Save' : 'Yes'
+  const submitButtonText = isDelete ? 'Delete' : 'Save'
 
   // For update
   const handleUpdate = async (values): Promise<void> => {
@@ -110,88 +116,122 @@ export default function CategoryDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>{action === 'edit' ? 'Update Category' : 'Delete Category'}</DialogTitle>
-          <DialogDescription className="sr-only">This is update category dialog</DialogDescription>
+      <DialogContent className="max-w-[720px] gap-0 overflow-hidden border-border/70 bg-card/95 p-0">
+        <DialogHeader className="gap-3 border-b border-border/60 bg-gradient-to-b from-muted/40 to-transparent px-6 pb-4 pt-6 text-left">
+          <div className="flex items-start gap-3">
+            <div
+              className={`flex h-11 w-11 items-center justify-center rounded-lg ${
+                isDelete ? 'bg-destructive/15 text-destructive' : 'bg-primary/15 text-primary'
+              }`}
+            >
+              {isDelete ? <Trash2 className="h-5 w-5" /> : <Tag className="h-5 w-5" />}
+            </div>
+            <div className="space-y-1">
+              <DialogTitle className="text-xl font-semibold tracking-tight">
+                {dialogTitle}
+              </DialogTitle>
+              <DialogDescription className="text-sm text-muted-foreground">
+                {dialogDescription}
+              </DialogDescription>
+            </div>
+          </div>
         </DialogHeader>
-        <Separator className="mt-3 mb-2" />
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleUpdate)}>
-            {action === 'edit' ? (
-              <div className="space-y-4 md:space-y-8 mb-2 md:mb-8">
-                {/* Basic Information */}
-                <FormField
-                  control={form.control}
-                  name="title"
-                  defaultValue={category?.title}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Title *</FormLabel>
-                      <FormControl>
-                        <Input className="mt-2" placeholder="Enter category title" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+            <div className="px-6 py-5">
+              {action === 'edit' ? (
+                <div className="grid gap-5">
+                  {/* Basic Information */}
+                  <FormField
+                    control={form.control}
+                    name="title"
+                    defaultValue={category?.title}
+                    render={({ field }) => (
+                      <FormItem className="space-y-2">
+                        <FormLabel className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+                          Title *
+                        </FormLabel>
+                        <FormControl>
+                          <Input placeholder="Enter category title" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                {/* Description */}
-                <FormField
-                  control={form.control}
-                  name="description"
-                  defaultValue={category?.description}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Description *</FormLabel>
-                      <FormControl>
-                        <Textarea
-                          placeholder="Enter category description"
-                          className="min-h-25 mt-2"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-            ) : (
-              action === 'delete' && (
-                <h3>
-                  Are your sure your want to delete{' '}
-                  <span className="font-bold">{category?.title}</span> record ?
-                </h3>
-              )
-            )}
+                  {/* Description */}
+                  <FormField
+                    control={form.control}
+                    name="description"
+                    defaultValue={category?.description}
+                    render={({ field }) => (
+                      <FormItem className="space-y-2">
+                        <FormLabel className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+                          Description *
+                        </FormLabel>
+                        <FormControl>
+                          <Textarea
+                            placeholder="Enter category description"
+                            className="min-h-[120px]"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              ) : (
+                isDelete && (
+                  <div className="rounded-lg border border-destructive/30 bg-destructive/10 p-4">
+                    <p className="text-sm text-foreground">
+                      You are about to delete{' '}
+                      <span className="font-semibold text-destructive">
+                        {category?.title}
+                      </span>
+                      .
+                    </p>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      This action cannot be undone and will remove the category from your
+                      catalog.
+                    </p>
+                  </div>
+                )
+              )}
+            </div>
 
-            <Separator className="mt-6 mb-5" />
-            <DialogFooter>
-              <div className="flex justify-end gap-2 items-center">
-                <Button size="sm" type="button" variant="outline" onClick={handleDialogClose}>
-                  Cancel
-                </Button>
-                <Button
-                  size="sm"
-                  disabled={form.formState.isSubmitting}
-                  type={action === 'edit' ? 'submit' : 'button'}
-                  variant={action === 'edit' ? 'default' : 'destructive'}
-                  onClick={() => {
-                    if (action === 'edit') {
-                      handleUpdate()
-                    } else if (action === 'delete') {
-                      handeDelete(category?.id as number)
-                    }
-                  }}
-                  className="flex bg-primary hover:bg-primary "
-                >
-                  {loading || form.formState.isSubmitting ? (
-                    <Spinner isPageLoader={false} size={22} className="text-white" />
-                  ) : (
-                    submitButtonText
-                  )}
-                </Button>
-              </div>
+            <DialogFooter className="gap-2 border-t border-border/60 bg-muted/30 px-6 py-4 sm:items-center sm:gap-3 sm:space-x-0">
+              <Button
+                size="sm"
+                type="button"
+                variant="outline"
+                onClick={handleDialogClose}
+                className="min-w-[100px]"
+              >
+                Cancel
+              </Button>
+              <Button
+                size="sm"
+                disabled={form.formState.isSubmitting || loading}
+                type={isDelete ? 'button' : 'submit'}
+                variant={isDelete ? 'destructive' : 'default'}
+                onClick={() => {
+                  if (isDelete) {
+                    handeDelete(category?.id as number)
+                  }
+                }}
+                className="min-w-[110px]"
+              >
+                {loading || form.formState.isSubmitting ? (
+                  <Spinner
+                    isPageLoader={false}
+                    size={22}
+                    className={isDelete ? 'text-destructive-foreground' : 'text-primary-foreground'}
+                  />
+                ) : (
+                  submitButtonText
+                )}
+              </Button>
             </DialogFooter>
           </form>
         </Form>
