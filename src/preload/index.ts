@@ -12,7 +12,8 @@ const api = {
   signIn: (data: SignInTypes) => ipcRenderer.invoke('users:sign-in', data),
   logout: () => ipcRenderer.invoke('user:logout'),
   // categories
-  getCategories: () => ipcRenderer.invoke('get-categories'),
+  getCategories: ({ page, limit }: { page: string; limit: string }) =>
+    ipcRenderer.invoke('get-categories', { page, limit }),
   addCategory: (data: AddCategoryTypes) => ipcRenderer.invoke('add-category', data),
   updateCategory: (data: AddCategoryTypes) => ipcRenderer.invoke('update-category', data),
   deleteCategory: (id: number) => ipcRenderer.invoke('delete-category', id),

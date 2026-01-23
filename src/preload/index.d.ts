@@ -14,7 +14,7 @@ declare global {
       // session
       getSession: () => Promise<AuthTypes>
       // categories
-      getCategories: () => Promise<ResponseTypes>
+      getCategories: ({ page, limit }) => Promise<ResponseTypes>
       addCategory: (data: AddCategoryTypes) => Promise<ResponseTypes>
       updateCategory: (data: AddCategoryTypes) => Promise<ResponseTypes>
       deleteCategory: (id: number) => Promise<ResponseTypes>
