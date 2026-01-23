@@ -41,10 +41,42 @@ export const CategoriesServices = {
     }
   },
   // get categories
-  getCategories: async (): Promise<ResponseTypes> => {
+  getCategories: async ({
+    page,
+    limit
+  }: {
+    page: string
+    limit: string
+  }): Promise<ResponseTypes> => {
     try {
-      const categories = await prisma.category.findMany()
-      return { success: true, message: 'Categories fetched successfully', data: categories }
+      const pageNumber = Number(page)
+      const limitNumber = Number(limit)
+
+      // validation
+      if (!pageNumber || pageNumber === undefined || !limit || limit === undefined) {
+        return { success: false, message: 'Page or limit is required' + page + '--' + limit }
+      }
+
+      // pagination
+      const skip = Number((pageNumber - 1) * limitNumber)
+      // get categories
+      const categories = await prisma.category.findMany({
+        skip: skip,
+        take: limitNumber
+      })
+
+      const total = await prisma.category.count()
+
+      return {
+        success: true,
+        message: 'Categories fetched successfully',
+        data: categories,
+        pagination: {
+          page,
+          limit,
+          total
+        }
+      }
     } catch (error) {
       console.log('error--', error)
       return { success: false, message: 'Error fetching categories' + error }
