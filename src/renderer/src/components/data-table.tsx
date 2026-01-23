@@ -131,15 +131,15 @@ export function DataTable<TData, TValue>({
   page,
   // FIXED: Replace this line
   getRowId = (original: TData) => (original as Record<string, unknown>).id as UniqueIdentifier
-}: DataTableProps<TData, TValue>) {
+}: DataTableProps<TData, TValue>): React.JSX.Element {
   // total pages
   const totalPages = Math.ceil(total / limit)
   // router
-  const router = useNavigate()
+  const navigate = useNavigate()
 
   // router handler
-  const goToPage = (page: number) => {
-    router(`?page=${page}&limit=${limit}`)
+  const goToPage = (page: number): void => {
+    navigate(`?page=${page}&limit=${limit}`, { replace: true })
   }
 
   const [data, setData] = React.useState(initialData)
