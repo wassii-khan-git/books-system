@@ -4,9 +4,12 @@ import { AddCategoryTypes, CategoriesServices } from '../services/categories.ser
 // Categories controller
 export const categoriesController = async (): Promise<void> => {
   // get all categories
-  ipcMain.handle('get-categories', async () => {
-    return await CategoriesServices.getCategories()
-  })
+  ipcMain.handle(
+    'get-categories',
+    async (_event, { page, limit }: { page: string; limit: string }) => {
+      return await CategoriesServices.getCategories({ page, limit })
+    }
+  )
   ipcMain.handle('add-category', async (_event, { title, description }: AddCategoryTypes) => {
     return await CategoriesServices.addCategory({ title, description })
   })
