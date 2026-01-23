@@ -1,15 +1,18 @@
-import { Separator } from '@/components/ui/separator'
-// import { SidebarTrigger } from '@/components/ui/sidebar'
 import { JSX } from 'react'
 
 export function SiteHeader(): JSX.Element {
   return (
-    <header className="group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 flex h-12 shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear">
-      <div className="flex w-full items-center gap-1 px-4 lg:gap-2 lg:px-6">
-        {/* <SidebarTrigger className="-ml-1" /> */}
-        <Separator orientation="vertical" className="mx-2 data-[orientation=vertical]:h-4" />
-        <h1 className="text-base font-medium">Documents</h1>
+    <header className="flex h-12 shrink-0 items-center justify-between border-b bg-background/70 px-4 backdrop-blur">
+      <div className="flex items-center gap-3">
+        <span className="h-2 w-2 rounded-full bg-primary shadow-[0_0_0_4px_rgba(0,163,92,0.15)]" />
+        <div className="leading-tight">
+          <p className="text-[11px] uppercase tracking-[0.25em] text-muted-foreground">
+            Workspace
+          </p>
+          <h1 className="text-sm font-semibold tracking-tight">Library Overview</h1>
+        </div>
       </div>
+      <span className="text-xs font-medium text-muted-foreground">Connected</span>
     </header>
   )
 }
