@@ -1,12 +1,18 @@
-import React, { JSX, useEffect, useState } from 'react'
+import React, { JSX, useCallback, useEffect, useState } from 'react'
 import { DataTable } from '@/components/data-table'
 import { toast } from 'sonner'
 import { Category, getColumns } from './columns'
 import CategoryDialog from './dialog'
 import { ResponseTypes } from 'src/main/types'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Plus } from 'lucide-react'
+
+export type CategoryPageProps = {
+  page: number
+  limit: number
+  total?: number
+}
 
 const CategoriesPage = (): JSX.Element => {
   // open
@@ -14,22 +20,17 @@ const CategoriesPage = (): JSX.Element => {
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null)
   // router
   const [action, setAction] = useState<string>('')
+  // get url params
+  const [searchParams] = useSearchParams()
+
+  const page = Number(searchParams.get('page')) || 1
+  const limit = Number(searchParams.get('limit')) || 5
+
+  // total
+  const [total, setTotal] = useState<number>(0)
 
   // categories
   const [categories, setCategories] = useState<Category[]>([])
-
-  // get all categories
-  const getCategories = async (): Promise<void> => {
-    try {
-      const categories: ResponseTypes = await window.api.getCategories()
-      console.log('categories', categories)
-      if (categories.success) {
-        setCategories(categories.data?.length > 0 ? categories.data : [])
-      }
-    } catch (error) {
-      console.log('error--', error)
-    }
-  }
 
   // handle edit
   const handleEdit = (data: Category): void => {
@@ -38,6 +39,7 @@ const CategoriesPage = (): JSX.Element => {
     setSelectedCategory(data)
     console.log('data- in hadle edit--', data)
   }
+
   // handle delete
   const handleDelete = (data: Category): void => {
     setAction('delete')
@@ -57,7 +59,7 @@ const CategoriesPage = (): JSX.Element => {
       if (result.success) {
         toast.success(result.message)
         // filter categories
-        await getCategories()
+        await getCategories({ page, limit })
       } else {
         toast.error(result.message)
       }
@@ -78,12 +80,29 @@ const CategoriesPage = (): JSX.Element => {
     }
   }
 
+  // get all categories
+  const getCategories = async ({ page, limit }: CategoryPageProps): Promise<void> => {
+    try {
+      const categories: ResponseTypes = await window.api.getCategories({ page, limit })
+      console.log('categories', categories)
+      if (categories.success) {
+        setCategories(categories.data?.length > 0 ? categories.data : [])
+        setTotal(categories.pagination?.total as number)
+      }
+    } catch (error) {
+      console.log('error--', error)
+    }
+  }
+
   useEffect(() => {
-    getCategories()
-  }, [])
+    getCategories({ page, limit })
+  }, [searchParams, page, limit])
+
+  console.log('searchParams---', searchParams)
 
   // columns
   const columns = getColumns({ onEdit: handleEdit, onDelete: handleDelete })
+
   return (
     <>
       <div className="flex flex-1 flex-col">
@@ -99,7 +118,13 @@ const CategoriesPage = (): JSX.Element => {
               </Link>
             </div>
             {/* All categories */}
-            <DataTable columns={columns} data={categories} page={1} limit={1} total={10} />
+            <DataTable
+              columns={columns}
+              data={categories}
+              page={page}
+              limit={limit}
+              total={total}
+            />
             {/* Category Dialog */}
             <CategoryDialog
               open={open}
