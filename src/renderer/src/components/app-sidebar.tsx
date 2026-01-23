@@ -14,16 +14,15 @@ import {
   SidebarMenuItem
 } from '@/components/ui/sidebar'
 import {
-  ArrowUp,
-  Box,
-  Building2,
-  Layers2,
-  LayoutDashboard,
-  ListChecksIcon,
-  NotepadTextIcon,
-  User,
-  Users
-} from 'lucide-react'
+  IconBook2,
+  IconBuildingStore,
+  IconLayoutDashboard,
+  IconMessageCircle,
+  IconPackage,
+  IconReceipt2,
+  IconTags,
+  IconUser
+} from '@tabler/icons-react'
 import { Link } from 'react-router-dom'
 
 const dashboardNavigations = {
@@ -31,14 +30,14 @@ const dashboardNavigations = {
     {
       title: 'Dashboard',
       url: 'dashboard',
-      icon: LayoutDashboard,
+      icon: IconLayoutDashboard,
       isActive: true
     },
 
     {
       title: 'Categories',
       url: 'dashboard/categories',
-      icon: Layers2,
+      icon: IconTags,
       isActive: false,
       items: [
         {
@@ -54,7 +53,7 @@ const dashboardNavigations = {
     {
       title: 'Companies',
       url: 'dashboard/companies',
-      icon: Building2,
+      icon: IconBuildingStore,
       isActive: false,
       items: [
         {
@@ -70,7 +69,7 @@ const dashboardNavigations = {
     {
       title: 'Products',
       url: 'dashboard/products',
-      icon: ListChecksIcon,
+      icon: IconPackage,
       isActive: false,
       items: [
         {
@@ -86,19 +85,19 @@ const dashboardNavigations = {
     {
       title: 'Orders',
       url: 'dashboard/orders',
-      icon: Box,
+      icon: IconReceipt2,
       isActive: false
     },
     {
       title: 'Users',
       url: 'dashboard/users',
-      icon: Users,
+      icon: IconUser,
       isActive: false
     },
     {
       title: 'Queries',
       url: 'dashboard/queries',
-      icon: NotepadTextIcon,
+      icon: IconMessageCircle,
       isActive: false
     }
     // {
@@ -116,7 +115,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>): 
   const user = {
     name: session.data?.user.name || 'admin',
     email: session.data?.user.email || '',
-    avatar: <User />
+    avatar: <IconUser className="h-4 w-4" />
   }
   return (
     <Sidebar collapsible="offcanvas" {...props}>
@@ -125,8 +124,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>): 
           <SidebarMenuItem>
             <SidebarMenuButton asChild className="data-[slot=sidebar-menu-button]:p-1.5!">
               <Link to="dashboard">
-                <ArrowUp className="size-5!" />
-                <span className="text-base font-semibold">Books Store.</span>
+                <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary shadow-sm">
+                  <IconBook2 className="h-5 w-5" />
+                </span>
+                <div className="flex flex-col leading-tight">
+                  <span className="text-sm font-semibold tracking-tight">Books Compass</span>
+                  <span className="text-[11px] text-muted-foreground">Inventory Studio</span>
+                </div>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>

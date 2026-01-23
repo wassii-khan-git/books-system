@@ -1,6 +1,6 @@
 'use client'
 
-import { ChevronRight, type LucideIcon } from 'lucide-react'
+import { ChevronRight } from 'lucide-react'
 
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 import {
@@ -13,8 +13,10 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem
 } from '@/components/ui/sidebar'
-import { JSX } from 'react'
+import { JSX, type ComponentType, type SVGProps } from 'react'
 import { Link } from 'react-router-dom'
+
+type IconType = ComponentType<SVGProps<SVGSVGElement>>
 
 export function NavMain({
   items
@@ -22,7 +24,7 @@ export function NavMain({
   items: {
     title: string
     url: string
-    icon?: LucideIcon
+    icon?: IconType
     isActive?: boolean
     items?: {
       title: string
