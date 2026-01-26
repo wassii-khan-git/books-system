@@ -5,6 +5,7 @@ import icon from '../../resources/icon.png?asset'
 import { usersController } from './controllers/users.controller'
 import { sessionsController } from './controllers/session.controller'
 import { categoriesController } from './controllers/categories.controller'
+import { companiesController } from './controllers/companies.controller'
 
 let mainWindow: BrowserWindow | null = null
 
@@ -93,6 +94,7 @@ app.whenReady().then(() => {
   sessionsController()
   usersController()
   categoriesController()
+  companiesController()
 
   createWindow()
 

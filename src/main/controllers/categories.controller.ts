@@ -10,6 +10,9 @@ export const categoriesController = async (): Promise<void> => {
       return await CategoriesServices.getCategories({ page, limit })
     }
   )
+  ipcMain.handle('get-category-by-id', async (_event, id: number) => {
+    return await CategoriesServices.getCategoryById(id)
+  })
   ipcMain.handle('add-category', async (_event, { title, description }: AddCategoryTypes) => {
     return await CategoriesServices.addCategory({ title, description })
   })
