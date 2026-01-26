@@ -1,11 +1,14 @@
 import { lazy } from 'react'
 import HomePage from '@/pages/(admin)/home'
 import { Navigate } from 'react-router-dom'
+
 // imports
 const AddCategoryPage = lazy(() => import('@/pages/(admin)/(add-category)/index'))
 const CategoriesPage = lazy(() => import('@/pages/(admin)/(categories)'))
 const AddCompanyPage = lazy(() => import('@/pages/(admin)/(add-company)/index'))
 const CompaniesPage = lazy(() => import('@/pages/(admin)/(companies)/index'))
+const AddProductPage = lazy(() => import('@/pages/(admin)/(add-product)/index'))
+const ProductsPage = lazy(() => import('@/pages/(admin)/(companies)/index'))
 
 const dashboardRoutes = [
   {
@@ -31,6 +34,14 @@ const dashboardRoutes = [
   {
     path: 'dashboard/companies',
     element: <CompaniesPage />
+  },
+  {
+    path: 'dashboard/add-product',
+    element: <AddProductPage />
+  },
+  {
+    path: 'dashboard/products',
+    element: <ProductsPage />
   },
   {
     path: '*',
