@@ -1,12 +1,12 @@
-import React, { JSX, useCallback, useEffect, useState } from 'react'
+import React, { JSX, useState } from 'react'
 import { DataTable } from '@/components/data-table'
 import { toast } from 'sonner'
 import { Category, getColumns } from './columns'
 import CategoryDialog from './dialog'
-import { ResponseTypes } from 'src/main/types'
 import { Link, useSearchParams } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Plus } from 'lucide-react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 
 export type CategoryPageProps = {
   page: number
@@ -15,6 +15,8 @@ export type CategoryPageProps = {
 }
 
 const CategoriesPage = (): JSX.Element => {
+  // query client
+  const queryClient = useQueryClient()
   // open
   const [open, setOpen] = useState<boolean>(false)
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null)
@@ -25,12 +27,6 @@ const CategoriesPage = (): JSX.Element => {
 
   const page = Number(searchParams.get('page')) || 1
   const limit = Number(searchParams.get('limit')) || 5
-
-  // total
-  const [total, setTotal] = useState<number>(0)
-
-  // categories
-  const [categories, setCategories] = useState<Category[]>([])
 
   // handle edit
   const handleEdit = (data: Category): void => {
@@ -59,7 +55,7 @@ const CategoriesPage = (): JSX.Element => {
       if (result.success) {
         toast.success(result.message)
         // filter categories
-        await getCategories({ page, limit })
+        queryClient.invalidateQueries({ queryKey: ['categories', page, limit] })
       } else {
         toast.error(result.message)
       }
@@ -69,10 +65,7 @@ const CategoriesPage = (): JSX.Element => {
         toast.success(result.message)
         if (selectedCategory?.id !== null) {
           // filter categories
-          const filteredCategories = categories.filter(
-            (category) => category.id !== selectedCategory?.id
-          )
-          setCategories(filteredCategories.length > 0 ? filteredCategories : [])
+          queryClient.invalidateQueries({ queryKey: ['categories', page, limit] })
         }
       } else {
         toast.error(result.message)
@@ -81,22 +74,11 @@ const CategoriesPage = (): JSX.Element => {
   }
 
   // get all categories
-  const getCategories = async ({ page, limit }: CategoryPageProps): Promise<void> => {
-    try {
-      const categories: ResponseTypes = await window.api.getCategories({ page, limit })
-      console.log('categories', categories)
-      if (categories.success) {
-        setCategories(categories.data?.length > 0 ? categories.data : [])
-        setTotal(categories.pagination?.total as number)
-      }
-    } catch (error) {
-      console.log('error--', error)
-    }
-  }
-
-  useEffect(() => {
-    getCategories({ page, limit })
-  }, [searchParams, page, limit])
+  const { data: categories } = useQuery({
+    queryKey: ['categories', page, limit],
+    queryFn: async () => await window.api?.getCategories({ page, limit }),
+    enabled: !!page || !!limit
+  })
 
   console.log('searchParams---', searchParams)
 
@@ -104,39 +86,37 @@ const CategoriesPage = (): JSX.Element => {
   const columns = getColumns({ onEdit: handleEdit, onDelete: handleDelete })
 
   return (
-    <>
-      <div className="flex flex-1 flex-col">
-        <div className="@container/main flex flex-1 flex-col gap-2">
-          <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
-            <div className="flex justify-between items-center px-4 lg:px-6">
-              <h1 className="text-lg">All Categories</h1>
-              <Link to="/dashboard/add-category">
-                <Button variant="outline" size="sm">
-                  <Plus />
-                  <span className="hidden lg:inline">Add Category</span>
-                </Button>
-              </Link>
-            </div>
-            {/* All categories */}
-            <DataTable
-              columns={columns}
-              data={categories}
-              page={page}
-              limit={limit}
-              total={total}
-            />
-            {/* Category Dialog */}
-            <CategoryDialog
-              open={open}
-              onOpenChange={setOpen}
-              category={selectedCategory}
-              onSave={onSave}
-              action={action}
-            />
+    <div className="flex flex-1 flex-col">
+      <div className="@container/main flex flex-1 flex-col gap-2">
+        <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
+          <div className="flex justify-between items-center px-4 lg:px-6">
+            <h1 className="text-lg">All Categories</h1>
+            <Link to="/dashboard/add-category">
+              <Button variant="outline" size="sm">
+                <Plus />
+                <span className="hidden lg:inline">Add Category</span>
+              </Button>
+            </Link>
           </div>
+          {/* All categories */}
+          <DataTable
+            columns={columns}
+            data={categories?.data || []}
+            page={page}
+            limit={limit}
+            total={categories?.pagination?.total as number}
+          />
+          {/* Category Dialog */}
+          <CategoryDialog
+            open={open}
+            onOpenChange={setOpen}
+            category={selectedCategory}
+            onSave={onSave}
+            action={action}
+          />
         </div>
       </div>
-    </>
+    </div>
   )
 }
 

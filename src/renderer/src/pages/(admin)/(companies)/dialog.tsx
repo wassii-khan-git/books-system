@@ -25,20 +25,19 @@ import { JSX, useEffect, useState } from 'react'
 import Spinner from '@/components/shared/spinner'
 import { Tag, Trash2 } from 'lucide-react'
 import { CompanyTypes } from './columns'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from '@/components/ui/select'
+import { useMutation, useQuery } from '@tanstack/react-query'
+import { Combobox } from '@/components/ui/combobox'
+import { Category } from '../(categories)/columns'
+import { ResponseTypes } from 'src/main/types'
 
 interface EditcompanyDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   company: CompanyTypes | null
-  onSave: (result: any) => void
+  onSave: (result: ResponseTypes) => void
   action: string
+  page: number
+  limit: number
 }
 
 export default function CompanyDialog({
@@ -46,14 +45,16 @@ export default function CompanyDialog({
   onOpenChange,
   company,
   onSave,
-  action
+  action,
+  page,
+  limit
 }: EditcompanyDialogProps): JSX.Element {
   // form
   const form = useForm({
     defaultValues: {
       name: company?.name,
-      categoryId: company?.categoryId,
-      percentage: company?.percentage
+      categoryId: String(company?.categoryId),
+      percentage: String(company?.percentage)
     }
   })
   const [loading, setLoading] = useState<boolean>(false)
@@ -70,24 +71,26 @@ export default function CompanyDialog({
   // For update
   const handleUpdate = async (values): Promise<void> => {
     console.log('values: ', values)
-
+    setLoading(true)
     const data = {
       ...values,
       id: company?.id as string
     }
-
     console.log('data--', data)
 
     try {
       // call update action
       const result = await window.api?.updateCompany(data)
       console.log('result: ', result)
+      setLoading(false)
       // call on save
       onSave({ success: result.success, message: result.message })
     } catch (error) {
       console.log('Error:', error)
+      setLoading(false)
     }
   }
+
   // For delete
   const handeDelete = async (id: number): Promise<void> => {
     // data
@@ -105,12 +108,39 @@ export default function CompanyDialog({
     }
   }
 
+  // get categories
+  const { data: categories } = useQuery({
+    queryKey: ['categories', page, limit],
+    queryFn: async () => {
+      const result = await window.api?.getCategories({ page: 1, limit: 50 })
+      return result
+    },
+    enabled: !!page || !!limit || open
+  })
+
+  // delete company
+  const { isPending: isDeleting } = useMutation({
+    mutationKey: ['delete-company'],
+    mutationFn: async () => {
+      const result: ResponseTypes = await window.api?.deleteCompany(Number(company?.id))
+      // if result is success
+      if (result.success) {
+        onSave({ success: result.success, message: result.message, data: result.data })
+      } else {
+        onSave({ success: result.success, message: result.message, data: result.data })
+      }
+    }
+  })
+
   useEffect(() => {
     if (open) {
-      form.reset()
-      setLoading(false)
+      form.reset({
+        name: company?.name,
+        categoryId: String(company?.categoryId),
+        percentage: String(company?.percentage)
+      })
     }
-  }, [open, form])
+  }, [open, company, form])
 
   const handleDialogClose = (): void => {
     form.reset()
@@ -119,11 +149,12 @@ export default function CompanyDialog({
 
   console.log('cagtegory-=--', company)
   console.log('Aciton---', action)
+  console.log('categories---', categories)
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[720px] gap-0 overflow-hidden border-border/70 bg-card/95 p-0">
-        <DialogHeader className="gap-3 border-b border-border/60 bg-gradient-to-b from-muted/40 to-transparent px-6 pb-4 pt-6 text-left">
+      <DialogContent className="max-w-180 gap-0 overflow-hidden border-border/70 bg-card/95 p-0">
+        <DialogHeader className="gap-3 border-b border-border/60 bg-linear-to-b from-muted/40 to-transparent px-6 pb-4 pt-6 text-left">
           <div className="flex items-start gap-3">
             <div
               className={`flex h-11 w-11 items-center justify-center rounded-lg ${
@@ -170,23 +201,22 @@ export default function CompanyDialog({
                     control={form.control}
                     name="categoryId"
                     render={({ field }) => (
-                      <FormItem>
+                      <FormItem className=" flex flex-col">
                         <FormLabel>Category *</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl className="w-full">
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select category" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="select">Select</SelectItem>
-                            {[].map((category) => (
-                              <SelectItem key={category?.id} value={category?.id}>
-                                {category?.title}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        <FormControl className="flex">
+                          <Combobox
+                            // Map your API data to label/value pairs
+                            items={
+                              categories?.data?.map((cat: Category) => ({
+                                label: cat.title,
+                                value: String(cat.id)
+                              })) || []
+                            }
+                            value={String(field.value)}
+                            onSelect={field.onChange} // Updates React Hook Form state
+                            placeholder="Select a category"
+                          />
+                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -199,7 +229,12 @@ export default function CompanyDialog({
                       <FormItem>
                         <FormLabel>Percentage *</FormLabel>
                         <FormControl>
-                          <Input className="mt-2" placeholder="Enter percentage" {...field} />
+                          <Input
+                            defaultValue={company?.percentage}
+                            className="mt-2"
+                            placeholder="Enter percentage"
+                            {...field}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -227,7 +262,7 @@ export default function CompanyDialog({
                 type="button"
                 variant="outline"
                 onClick={handleDialogClose}
-                className="min-w-[100px]"
+                className="min-w-25"
               >
                 Cancel
               </Button>
@@ -241,9 +276,9 @@ export default function CompanyDialog({
                     handeDelete(Number(company?.id))
                   }
                 }}
-                className="min-w-[110px]"
+                className="min-w-27.5"
               >
-                {loading || form.formState.isSubmitting ? (
+                {loading || form.formState.isSubmitting || isDeleting ? (
                   <Spinner
                     isPageLoader={false}
                     size={22}

@@ -1,5 +1,6 @@
 // src/app/dashboard/categories/columns.tsx
 'use client'
+
 import { type ColumnDef } from '@tanstack/react-table'
 import {
   DropdownMenu,
@@ -18,7 +19,7 @@ export type CompanyTypes = {
   id: string // Assuming UUID from Prisma
   name: string
   categoryId: number
-  categories: Category[]
+  category: Category
   percentage: number
   createdAt?: string
   updatedAt?: string
@@ -56,7 +57,7 @@ export const getColumns = ({ onEdit, onDelete }: columnsProps): ColumnDef<Compan
   {
     accessorKey: 'percentage',
     header: 'Percentage',
-    cell: ({ row }) => <div className="font-medium">{row.original?.percentage?.title}</div>
+    cell: ({ row }) => <div className="font-medium">{row.original?.percentage}</div>
   },
 
   // Column for Actions
