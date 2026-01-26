@@ -2,7 +2,6 @@ import React, { JSX } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
 
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -20,13 +19,9 @@ import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
 import { companyFormValues, companySchema } from './validations'
 import Spinner from '@/components/shared/spinner'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from '@/components/ui/select'
+import { useQuery } from '@tanstack/react-query'
+import { Combobox } from '@/components/ui/combobox'
+import { Category } from '../(categories)/columns'
 
 export default function AddCompanyForm({
   className,
@@ -45,8 +40,14 @@ export default function AddCompanyForm({
   async function onSubmit(values: companyFormValues): Promise<void> {
     try {
       console.log('company data to submit:', values)
-      // Call server action
-      const result = await window.api?.addCompany(values)
+
+      // Call server action to add company
+      const result = await window.api?.addCompany({
+        name: values.name,
+        categoryId: values.categoryId,
+        percentage: values.percentage
+      })
+
       console.log('result', result)
       if (result.success) {
         // Reset form after successful submission
@@ -60,6 +61,15 @@ export default function AddCompanyForm({
       toast.error('Error adding company. Please try again.')
     }
   }
+
+  // get categories
+  const { data: categories } = useQuery({
+    queryKey: ['categories'],
+    queryFn: async () => {
+      const result = await window.api?.getCategories({ page: 1, limit: 50 })
+      return result
+    }
+  })
 
   return (
     <div className="flex flex-1 flex-col">
@@ -87,34 +97,31 @@ export default function AddCompanyForm({
                         </FormItem>
                       )}
                     />
-
                     {/* Category */}
                     <FormField
                       control={form.control}
                       name="categoryId"
                       render={({ field }) => (
-                        <FormItem>
+                        <FormItem className=" flex flex-col">
                           <FormLabel>Category *</FormLabel>
-                          <Select onValueChange={field.onChange} defaultValue={field.value}>
-                            <FormControl className="w-full">
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select category" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectItem value="select">Select</SelectItem>
-                              {[].map((category) => (
-                                <SelectItem key={category.id} value={category.id}>
-                                  {category.title}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
+                          <FormControl className="flex">
+                            <Combobox
+                              // Map your API data to label/value pairs
+                              items={
+                                categories?.data?.map((cat: Category) => ({
+                                  label: cat.title,
+                                  value: String(cat.id)
+                                })) || []
+                              }
+                              value={field.value}
+                              onSelect={field.onChange} // Updates React Hook Form state
+                              placeholder="Select a category"
+                            />
+                          </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
-
                     <FormField
                       control={form.control}
                       name="percentage"
