@@ -2,14 +2,14 @@ import prisma from '../src/main/lib/prisma'
 
 async function main(): Promise<void> {
   // Create a new user with a
-  const user = await prisma.user.create({
-    data: {
-      name: 'Shredded Union',
-      email: 'developer@gmail.com',
-      password: '$2a$12$i9LRleJbKfM3ypNEtX82XOuO6IGftqd/EXWWLraD5DmKBRhxie2G2'
-    }
-  })
-  console.log('Created user:', user)
+  // const user = await prisma.user.create({
+  //   data: {
+  //     name: 'Shredded Union',
+  //     email: 'developer@gmail.com',
+  //     password: '$2a$12$i9LRleJbKfM3ypNEtX82XOuO6IGftqd/EXWWLraD5DmKBRhxie2G2'
+  //   }
+  // })
+  // console.log('Created user:', user)
 
   // seed 20 categories record
   for (let i = 0; i < 20; i++) {
@@ -22,8 +22,8 @@ async function main(): Promise<void> {
   }
 
   // Fetch all users with their
-  const allUsers = await prisma.user.findMany({})
-  console.log('All users:', JSON.stringify(allUsers, null, 2))
+  // const allUsers = await prisma.user.findMany({})
+  // console.log('All users:', JSON.stringify(allUsers, null, 2))
 }
 
 main()

@@ -28,17 +28,62 @@ model Category {
   description String
   // relations
   companies Company[]
+  products Product[]
   updatedAt DateTime @updatedAt
   createdAt DateTime @default(now())
+
+  @@map("categories")
 }
 
 model Company {
   id    Int    @id @default(autoincrement())
   name  String 
-  categoryId Int
   percentage Int
+
   // relations
+  categoryId Int
   category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  products Product[]
+
   updatedAt DateTime @updatedAt
   createdAt DateTime @default(now())
+
+  @@index([categoryId])
+  @@map("companies")
+}
+
+model Product {
+  id     Int    @id @default(autoincrement())
+  title  String 
+  author String
+  description String
+  price Int
+  originalPrice Int
+  discountedPrice Int
+  quantity Int
+  isbn String
+  pages Int
+  language String
+  publisher String
+  inStock Boolean @default(true)
+  off  Int @default(0)
+  isActive Boolean @default(true)
+  
+  // Foreign keys
+  categoryId      Int
+  companyId       Int
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  // Indexes for performance
+  @@index([categoryId])
+  @@index([inStock])
+  @@index([createdAt])
+  @@map("products")
 }
