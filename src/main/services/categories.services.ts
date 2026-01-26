@@ -82,6 +82,18 @@ export const CategoriesServices = {
       return { success: false, message: 'Error fetching categories' + error }
     }
   },
+  // get category by id
+  getCategoryById: async (id: number): Promise<ResponseTypes> => {
+    try {
+      const category = await prisma.category.findFirst({
+        where: { id }
+      })
+      return { success: true, message: 'Category fetched successfully', data: category }
+    } catch (error) {
+      console.log('error--', error)
+      return { success: false, message: 'Error fetching category' + error }
+    }
+  },
   // update category
   updateCategory: async ({ id, title, description }: AddCategoryTypes): Promise<ResponseTypes> => {
     // data
