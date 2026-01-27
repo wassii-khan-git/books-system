@@ -15,9 +15,9 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 
 interface ComboboxProps {
-  items: { label: string; value: string }[]
-  value?: string
-  onSelect: (value: string) => void
+  items: { label: string; value: number }[]
+  value?: number
+  onSelect: (value: number) => void
   placeholder?: string
 }
 
@@ -51,7 +51,7 @@ export function Combobox({
               {items.map((item) => (
                 <CommandItem
                   key={item.value}
-                  value={item.value}
+                  value={String(item.value)}
                   onSelect={() => {
                     onSelect(item.value)
                     setOpen(false)
