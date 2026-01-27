@@ -1,4 +1,4 @@
-import React, { JSX, useState } from 'react'
+import React, { JSX, useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -26,48 +26,92 @@ import { Category } from '../(categories)/columns'
 import { Textarea } from '@/components/ui/textarea'
 import { Switch } from '@/components/ui/switch'
 import { CompanyTypes } from '../(companies)/columns'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
+import { ChevronLeft } from 'lucide-react'
+import { ResponseTypes } from 'src/main/types'
+import { AddProductTypes } from 'src/main/services/product.services'
 
-export default function AddProductForm({
-  className,
-  ...props
-}: React.ComponentProps<'div'>): JSX.Element {
+export default function AddProductPage(): JSX.Element {
+  // query client
+  // get url params
+  const [searchParams] = useSearchParams()
+  // navigate
+  const navigate = useNavigate()
+
+  const productId = searchParams.get('productId') || ''
+
+  // get the product
+  const { data: product } = useQuery({
+    queryKey: ['product', productId],
+    queryFn: async () => {
+      const result = await window.api?.getProductById(Number(productId))
+      console.log('resulttt-from get proiduct by--', result)
+      return result
+    },
+    enabled: !!productId
+  })
+
+  console.log('productIdd---', productId)
+
   // form
   const form = useForm<ProductFormValues>({
     resolver: zodResolver(productSchema),
     defaultValues: {
-      companyId: '',
-      categoryId: '',
-      title: '',
-      author: '',
-      description: '',
-      price: 0,
-      originalPrice: 0,
-      quantity: 1,
-      isbn: '',
-      pages: 1,
-      language: '',
-      publisher: '',
-      inStock: true,
-      off: 0
+      id: product?.data?.id || undefined,
+      companyId: product?.data?.companyId,
+      categoryId: product?.data?.categoryId,
+      title: product?.data?.title,
+      author: product?.data?.author,
+      description: product?.data?.description,
+      price: product?.data?.price,
+      originalPrice: product?.data?.originalPrice,
+      discountedPrice: product?.data?.discountedPrice,
+      quantity: product?.data?.quantity,
+      isbn: product?.data?.isbn,
+      pages: product?.data?.pages,
+      language: product?.data?.language,
+      publisher: product?.data?.publisher,
+      inStock: product?.data?.inStock,
+      off: product?.data?.off || true
     }
   })
 
   // get categoryId
   const [categoryId, setCategoryId] = useState<number>(0)
+  // percentage
+  const [percentage, setPercentage] = useState<number>(0)
 
-  async function onSubmit(values: ProductFormValues): Promise<void> {
+  // on submit
+  async function onSubmit(values): Promise<void> {
     try {
       console.log('company data to submit:', values)
+      // result
+      let result: ResponseTypes = {
+        success: false,
+        message: 'default message'
+      }
+      // check if productId is provided
+      if (productId) {
+        // data
+        const data = {
+          id: productId,
+          ...values
+        }
+        result = await window.api?.updateProduct(data as AddProductTypes)
+      } else {
+        result = await window.api?.addProduct(values as AddProductTypes)
+      }
 
-      // Call server action to add company
-      const result = await window.api?.addProduct({})
-
-      console.log('result', result)
+      console.log('result---adding--product:--', result)
       if (result.success) {
         // Reset form after successful submission
-        form.reset()
-        setCategoryId(0) // Reset local state
-        toast.success(result.message || 'company added successfully')
+        setCategoryId(0)
+        toast.success(
+          result.message || productId
+            ? 'Product updated successfully'
+            : 'Product added successfully'
+        )
+        navigate('/dashboard/products')
       } else {
         toast.error(result.message || 'Error adding company. Please try again.')
       }
@@ -102,34 +146,71 @@ export default function AddProductForm({
     enabled: categoryId > 0
   })
 
-  // 3. Helper to handle company selection
-  const handleCompanySelect = (selectedId: string) => {
+  // Helper to handle company selection
+  const handleCompanySelect = (selectedId: number): void => {
     // Update form state for companyId
     form.setValue('companyId', selectedId)
 
     // Find the actual company object to get its categoryId
-    const selectedCompany = companies?.data?.find((c: CompanyTypes) => String(c.id) === selectedId)
+    const selectedCompany = companies?.data?.find((c: CompanyTypes) => Number(c.id) === selectedId)
 
     if (selectedCompany?.categoryId) {
-      const newCatId = Number(selectedCompany.categoryId)
+      const newCatId = selectedCompany.categoryId
       setCategoryId(newCatId)
-
+      setPercentage(selectedCompany?.percentage)
       // Auto-set the category field in the form as well
-      form.setValue('categoryId', String(newCatId))
+      form.setValue('categoryId', newCatId)
     }
   }
 
-  console.log('categorgyr---iidd==', categoryId)
-  console.log('0000categories--', categories)
+  useEffect(() => {
+    if (product) {
+      // form
+      form.reset({
+        companyId: product?.data?.companyId,
+        categoryId: product?.data?.categoryId,
+        title: product?.data?.title,
+        author: product?.data?.author,
+        description: product?.data?.description,
+        price: product?.data?.price,
+        originalPrice: product?.data?.originalPrice,
+        quantity: product?.data?.quantity,
+        isbn: product?.data?.isbn,
+        pages: product?.data?.pages,
+        language: product?.data?.language,
+        publisher: product?.data?.publisher,
+        inStock: product?.data?.inStock,
+        off: product?.data?.off
+      })
+      console.log('product---', product)
+    }
+  }, [product, form])
+
+  useEffect(() => {
+    if (product?.data?.company?.categoryId) {
+      setCategoryId(product.data?.company?.categoryId)
+    }
+  }, [product])
+
+  // console.log('categorgyr---iidd==', categoryId)
+  // console.log('0000categories--', categories)
+  console.log('product====', product)
 
   return (
     <div className="flex flex-1 flex-col">
       <div className="@container/main flex flex-1 flex-col gap-2">
         <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
           <div className="flex justify-between items-center px-4 lg:px-6">
-            <h1 className="text-lg">Add Company</h1>
+            <h1 className="text-lg">Add Product</h1>
+            {productId && (
+              <Link to={'/dashboard/products'}>
+                <Button size="sm">
+                  <ChevronLeft /> Go Back
+                </Button>
+              </Link>
+            )}
           </div>
-          <div className={cn('mx-6', className)} {...props}>
+          <div className={cn('mx-6')}>
             <Card>
               <CardContent className="pt-6">
                 <Form {...form}>
@@ -147,7 +228,7 @@ export default function AddProductForm({
                                 items={
                                   companies?.data?.map((c: CompanyTypes) => ({
                                     label: c.name,
-                                    value: String(c.id)
+                                    value: c.id
                                   })) || []
                                 }
                                 value={field.value}
@@ -173,7 +254,7 @@ export default function AddProductForm({
                                 items={
                                   categories?.data?.map((cat: Category) => ({
                                     label: cat.title,
-                                    value: String(cat.id)
+                                    value: cat.id
                                   })) || []
                                 }
                                 value={field.value}
@@ -332,7 +413,7 @@ export default function AddProductForm({
                             <FormLabel>Percentage (%)</FormLabel>
                             <FormControl>
                               <Input
-                                value={value}
+                                value={percentage || value}
                                 type="number"
                                 max="100"
                                 placeholder="0"
@@ -366,7 +447,7 @@ export default function AddProductForm({
                                 items={
                                   ['English', 'Urdu', 'Arabic'].map((lan) => ({
                                     label: lan,
-                                    value: String(lan)
+                                    value: lan
                                   })) || []
                                 }
                                 value={field.value}
@@ -383,16 +464,26 @@ export default function AddProductForm({
                       <FormField
                         control={form.control}
                         name="isbn"
-                        render={({ field }) => (
+                        render={({ field: { value, onChange, ...otherProps } }) => (
                           <FormItem>
-                            <FormLabel>ISBN *</FormLabel>
-                            <FormControl className="w-full">
-                              <Input placeholder="978-0123456789" {...field} />
+                            <FormLabel>Isbn *</FormLabel>
+                            <FormControl>
+                              <Input
+                                type="number"
+                                placeholder="097-32324233"
+                                value={value ?? ''}
+                                {...otherProps}
+                                onChange={(e) => {
+                                  const val = e.target.value
+                                  onChange(val === '' ? undefined : String(val))
+                                }}
+                              />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
                         )}
                       />
+
                       {/* Pages */}
                       <FormField
                         control={form.control}
@@ -455,8 +546,10 @@ export default function AddProductForm({
                       >
                         {form.formState.isSubmitting ? (
                           <Spinner isPageLoader={false} size={25} className="text-white" />
+                        ) : productId ? (
+                          'Update product'
                         ) : (
-                          'Add company'
+                          'Add product'
                         )}
                       </Button>
                     </div>

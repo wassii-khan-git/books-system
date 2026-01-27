@@ -13,24 +13,41 @@ import { Button } from '@/components/ui/button'
 import { MoreVertical, Pen, Trash } from 'lucide-react'
 import { DragHandle } from '@/components/data-table'
 import { Category } from '../(categories)/columns'
+import { CompanyTypes } from '../(companies)/columns'
 
 // Define the shape of your company data
-export type CompanyTypes = {
+export type ProductTypes = {
   id: string // Assuming UUID from Prisma
-  name: string
+  title: string
+  author: string
+  description: string
+  publisher: string
+  quantity: number
+  companyId: number
   categoryId: number
-  category: Category
+  price: number
+  originalPrice: number
+  discountedPrice?: number
   percentage: number
+  language: string
+  isbn: string
+  pages: number
+  inStock: boolean
+  off: number
+  // relations
+  category: Category
+  company: CompanyTypes
+
   createdAt?: string
   updatedAt?: string
 }
 
 interface columnsProps {
-  onEdit: (company: CompanyTypes) => void
-  onDelete: (company: CompanyTypes) => void
+  onEdit: (company: ProductTypes) => void
+  onDelete: (company: ProductTypes) => void
 }
 
-export const getColumns = ({ onEdit, onDelete }: columnsProps): ColumnDef<CompanyTypes>[] => [
+export const getColumns = ({ onEdit, onDelete }: columnsProps): ColumnDef<ProductTypes>[] => [
   // Column for Dragging
   {
     id: 'drag',
@@ -41,23 +58,36 @@ export const getColumns = ({ onEdit, onDelete }: columnsProps): ColumnDef<Compan
 
   // Column for name
   {
-    accessorKey: 'name',
-    header: 'Name',
-    cell: ({ row }) => <div className="font-medium">{row.original.name}</div>
+    accessorKey: 'title',
+    header: 'Title',
+    cell: ({ row }) => <div className="font-medium">{row.original.title}</div>
   },
 
   // Column for description
   {
-    accessorKey: 'Category',
+    accessorKey: 'category',
     header: 'Category',
     cell: ({ row }) => <div className="font-medium">{row.original?.category?.title}</div>
+  },
+
+  // Column for description
+  {
+    accessorKey: 'company',
+    header: 'Company',
+    cell: ({ row }) => <div className="font-medium">{row.original?.company?.name}</div>
   },
 
   // Column for Percentage
   {
     accessorKey: 'percentage',
     header: 'Percentage',
-    cell: ({ row }) => <div className="font-medium">{row.original?.percentage}</div>
+    cell: ({ row }) => (
+      <div className="font-medium">
+        <span className="bg-primary text-white rounded-sm p-1.5 text-xs">
+          {row.original?.company?.percentage + '  %'}
+        </span>
+      </div>
+    )
   },
 
   // Column for Actions
