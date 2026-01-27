@@ -1,4 +1,4 @@
-import { JSX } from 'react'
+import { JSX, useState } from 'react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -19,6 +19,8 @@ import { toast } from 'sonner'
 import heroImage from '@/assets/hero.jpg'
 import { ResponseTypes } from '../../../../main/types'
 import { useAuthStore } from '@/store/auth.slice'
+import { Eye, EyeClosed } from 'lucide-react'
+import Spinner from '@/components/shared/spinner'
 
 export interface UserTypes {
   id: number
@@ -35,13 +37,15 @@ export function LoginPage(): JSX.Element {
   const form = useForm<loginSchemaTypes>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: '',
-      password: ''
+      email: 'developer@gmail.com',
+      password: '123456'
     }
   })
 
   // navigate
   const navigate = useNavigate()
+  // show password
+  const [showPassword, setShowPassword] = useState<boolean>(false)
 
   // auth
   const setUser = useAuthStore((state) => state.setUser)
@@ -111,16 +115,37 @@ export function LoginPage(): JSX.Element {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Password *</FormLabel>
-                          <FormControl>
-                            <Input className="my-2" placeholder="Enter your password" {...field} />
-                          </FormControl>
+                          <div className="flex flex-row-reverse justify-between items-center">
+                            <FormControl>
+                              <Input
+                                type={showPassword ? 'text' : 'password'}
+                                className="relative my-2"
+                                placeholder="Enter your password"
+                                {...field}
+                              />
+                            </FormControl>
+                            <span
+                              className=" absolute text-gray-500 hover:text-gray-400 pr-4"
+                              onClick={() => setShowPassword((prev) => !prev)}
+                            >
+                              {showPassword ? (
+                                <Eye className="h-5 w-5" />
+                              ) : (
+                                <EyeClosed className="h-5 w-5" />
+                              )}
+                            </span>
+                          </div>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
                   </div>
                   <Button type="submit" className="w-full bg-primary">
-                    {form.formState.isSubmitting ? 'Loading...' : 'Login'}
+                    {form.formState.isSubmitting ? (
+                      <Spinner isPageLoader={false} size={14} className="text-white" />
+                    ) : (
+                      'Login'
+                    )}
                   </Button>
                 </div>
               </form>
