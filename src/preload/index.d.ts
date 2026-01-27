@@ -3,6 +3,7 @@ import { ElectronAPI } from '@electron-toolkit/preload'
 import { AuthTypes } from 'src/main/types'
 import { AddCategoryTypes } from 'src/main/services/categories.services'
 import { AddCompanyTypes } from 'src/main/services/companies.services'
+import { AddProductTypes } from 'src/main/services/product.services'
 
 declare global {
   interface Window {
@@ -25,6 +26,12 @@ declare global {
       addCompany: (data: AddCompanyTypes) => Promise<ResponseTypes>
       updateCompany: (data: AddCompanyTypes) => Promise<ResponseTypes>
       deleteCompany: (id: number) => Promise<ResponseTypes>
+      // products
+      getProducts: ({ page, limit }) => Promise<ResponseTypes>
+      getProductById: (productId: number) => Promise<ResponseTypes>
+      addProduct: (data: AddProductTypes) => Promise<ResponseTypes>
+      updateProduct: (data: AddProductTypes) => Promise<ResponseTypes>
+      deleteProduct: (id: number) => Promise<ResponseTypes>
       // window controls
       minimizeWindow: () => Promise<void>
       closeWindow: () => Promise<void>
