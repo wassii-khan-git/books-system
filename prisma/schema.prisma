@@ -57,12 +57,14 @@ model Product {
   title  String 
   author String
   description String
+  
   price Int
   originalPrice Int
   discountedPrice Int
   quantity Int
-  isbn String
+  isbn String?
   pages Int
+  
   language String
   publisher String
   inStock Boolean @default(true)

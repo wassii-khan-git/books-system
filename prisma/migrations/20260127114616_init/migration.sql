@@ -43,7 +43,7 @@ CREATE TABLE "products" (
     "originalPrice" INTEGER NOT NULL,
     "discountedPrice" INTEGER NOT NULL,
     "quantity" INTEGER NOT NULL,
-    "isbn" TEXT NOT NULL,
+    "isbn" TEXT,
     "pages" INTEGER NOT NULL,
     "language" TEXT NOT NULL,
     "publisher" TEXT NOT NULL,
