@@ -9,54 +9,33 @@ import {
   DialogFooter,
   DialogDescription
 } from '@/components/ui/dialog'
-import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { useForm } from 'react-hook-form'
-
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage
-} from '@/components/ui/form'
 import { JSX, useEffect, useState } from 'react'
 import Spinner from '@/components/shared/spinner'
 import { Tag, Trash2 } from 'lucide-react'
-import { CompanyTypes } from './columns'
-import { useMutation, useQuery } from '@tanstack/react-query'
-import { Combobox } from '@/components/ui/combobox'
-import { Category } from '../(categories)/columns'
+import { ProductTypes } from './columns'
+import { useMutation } from '@tanstack/react-query'
 import { ResponseTypes } from 'src/main/types'
 
 interface EditcompanyDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  company: CompanyTypes | null
+  product: ProductTypes | null
   onSave: (result: ResponseTypes) => void
   action: string
   page: number
   limit: number
 }
 
-export default function CompanyDialog({
+export default function ProductDialog({
   open,
   onOpenChange,
-  company,
+  product,
   onSave,
-  action,
-  page,
-  limit
+  action
 }: EditcompanyDialogProps): JSX.Element {
   // form
-  const form = useForm({
-    defaultValues: {
-      name: company?.name,
-      categoryId: String(company?.categoryId),
-      percentage: String(company?.percentage)
-    }
-  })
+
   const [loading, setLoading] = useState<boolean>(false)
 
   const isDelete = action === 'delete'
@@ -68,29 +47,6 @@ export default function CompanyDialog({
   // submit button
   const submitButtonText = isDelete ? 'Delete' : 'Save'
 
-  // For update
-  const handleUpdate = async (values): Promise<void> => {
-    console.log('values: ', values)
-    setLoading(true)
-    const data = {
-      ...values,
-      id: company?.id as string
-    }
-    console.log('data--', data)
-
-    try {
-      // call update action
-      const result = await window.api?.updateCompany(data)
-      console.log('result: ', result)
-      setLoading(false)
-      // call on save
-      onSave({ success: result.success, message: result.message })
-    } catch (error) {
-      console.log('Error:', error)
-      setLoading(false)
-    }
-  }
-
   // For delete
   const handeDelete = async (id: number): Promise<void> => {
     // data
@@ -99,7 +55,7 @@ export default function CompanyDialog({
     try {
       setLoading(true)
       // call delete action
-      const result = await window.api?.deleteCompany(id)
+      const result = await window.api?.deleteProduct(id)
       console.log('result: ', result)
       onSave({ success: result.success, message: result.message, data: result.data })
     } catch (error) {
@@ -108,21 +64,11 @@ export default function CompanyDialog({
     }
   }
 
-  // get categories
-  const { data: categories } = useQuery({
-    queryKey: ['categories', page, limit],
-    queryFn: async () => {
-      const result = await window.api?.getCategories({ page: 1, limit: 50 })
-      return result
-    },
-    enabled: !!page || !!limit || open
-  })
-
   // delete company
   const { isPending: isDeleting } = useMutation({
     mutationKey: ['delete-company'],
     mutationFn: async () => {
-      const result: ResponseTypes = await window.api?.deleteCompany(Number(company?.id))
+      const result: ResponseTypes = await window.api?.deleteProduct(Number(product?.id))
       // if result is success
       if (result.success) {
         onSave({ success: result.success, message: result.message, data: result.data })
@@ -132,24 +78,15 @@ export default function CompanyDialog({
     }
   })
 
-  useEffect(() => {
-    if (open) {
-      form.reset({
-        name: company?.name,
-        categoryId: String(company?.categoryId),
-        percentage: String(company?.percentage)
-      })
-    }
-  }, [open, company, form])
-
   const handleDialogClose = (): void => {
-    form.reset()
     onOpenChange(false)
   }
+  useEffect(() => {
+    setLoading(false)
+  }, [open])
 
-  console.log('cagtegory-=--', company)
+  console.log('product-=--', product)
   console.log('Aciton---', action)
-  console.log('categories---', categories)
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -173,124 +110,53 @@ export default function CompanyDialog({
             </div>
           </div>
         </DialogHeader>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleUpdate)}>
-            <div className="px-6 py-5">
-              {action === 'edit' ? (
-                <div className="grid gap-5">
-                  {/* Basic Information */}
-                  <FormField
-                    control={form.control}
-                    name="name"
-                    defaultValue={company?.name}
-                    render={({ field }) => (
-                      <FormItem className="space-y-2">
-                        <FormLabel className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-                          Name *
-                        </FormLabel>
-                        <FormControl>
-                          <Input placeholder="Enter company title" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  {/* Category */}
-                  <FormField
-                    control={form.control}
-                    name="categoryId"
-                    render={({ field }) => (
-                      <FormItem className=" flex flex-col">
-                        <FormLabel>Category *</FormLabel>
-                        <FormControl className="flex">
-                          <Combobox
-                            // Map your API data to label/value pairs
-                            items={
-                              categories?.data?.map((cat: Category) => ({
-                                label: cat.title,
-                                value: String(cat.id)
-                              })) || []
-                            }
-                            value={String(field.value)}
-                            onSelect={field.onChange} // Updates React Hook Form state
-                            placeholder="Select a category"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="percentage"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Percentage *</FormLabel>
-                        <FormControl>
-                          <Input
-                            defaultValue={company?.percentage}
-                            className="mt-2"
-                            placeholder="Enter percentage"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              ) : (
-                isDelete && (
-                  <div className="rounded-lg border border-destructive/30 bg-destructive/10 p-4">
-                    <p className="text-sm text-foreground">
-                      You are about to delete{' '}
-                      <span className="font-semibold text-destructive">{company?.name}</span>.
-                    </p>
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      This action cannot be undone and will remove the company from your catalog.
-                    </p>
-                  </div>
-                )
-              )}
+        <div className="px-6 py-5">
+          {action !== 'edit' && isDelete && (
+            <div className="rounded-lg border border-destructive/30 bg-destructive/10 p-4">
+              <p className="text-sm text-foreground">
+                You are about to delete{' '}
+                <span className="font-semibold text-destructive">{product?.title}</span>.
+              </p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                This action cannot be undone and will remove the company from your catalog.
+              </p>
             </div>
+          )}
+        </div>
 
-            <DialogFooter className="gap-2 border-t border-border/60 bg-muted/30 px-6 py-4 sm:items-center sm:gap-3 sm:space-x-0">
-              <Button
-                size="sm"
-                type="button"
-                variant="outline"
-                onClick={handleDialogClose}
-                className="min-w-25"
-              >
-                Cancel
-              </Button>
-              <Button
-                size="sm"
-                disabled={form.formState.isSubmitting || loading}
-                type={isDelete ? 'button' : 'submit'}
-                variant={isDelete ? 'destructive' : 'default'}
-                onClick={() => {
-                  if (isDelete) {
-                    handeDelete(Number(company?.id))
-                  }
-                }}
-                className="min-w-27.5"
-              >
-                {loading || form.formState.isSubmitting || isDeleting ? (
-                  <Spinner
-                    isPageLoader={false}
-                    size={22}
-                    className={isDelete ? 'text-destructive-foreground' : 'text-primary-foreground'}
-                  />
-                ) : (
-                  submitButtonText
-                )}
-              </Button>
-            </DialogFooter>
-          </form>
-        </Form>
+        <DialogFooter className="gap-2 border-t border-border/60 bg-muted/30 px-6 py-4 sm:items-center sm:gap-3 sm:space-x-0">
+          <Button
+            size="sm"
+            type="button"
+            variant="outline"
+            onClick={handleDialogClose}
+            className="min-w-25"
+          >
+            Cancel
+          </Button>
+          <Button
+            size="sm"
+            disabled={loading}
+            type={isDelete ? 'button' : 'submit'}
+            variant={isDelete ? 'destructive' : 'default'}
+            onClick={() => {
+              if (isDelete) {
+                handeDelete(Number(product?.id))
+              }
+            }}
+            className="min-w-27.5"
+          >
+            {loading || isDeleting ? (
+              <Spinner
+                isPageLoader={false}
+                size={22}
+                className={isDelete ? 'text-destructive-foreground' : 'text-primary-foreground'}
+              />
+            ) : (
+              submitButtonText
+            )}
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   )
