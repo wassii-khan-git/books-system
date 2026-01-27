@@ -8,7 +8,7 @@ const CategoriesPage = lazy(() => import('@/pages/(admin)/(categories)'))
 const AddCompanyPage = lazy(() => import('@/pages/(admin)/(add-company)/index'))
 const CompaniesPage = lazy(() => import('@/pages/(admin)/(companies)/index'))
 const AddProductPage = lazy(() => import('@/pages/(admin)/(add-product)/index'))
-const ProductsPage = lazy(() => import('@/pages/(admin)/(companies)/index'))
+const ProductsPage = lazy(() => import('@/pages/(admin)/(products)/index'))
 
 const dashboardRoutes = [
   {
