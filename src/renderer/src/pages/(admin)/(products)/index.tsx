@@ -34,8 +34,6 @@ const ProductsPage = (): JSX.Element => {
 
   // handle edit
   const handleEdit = (data: ProductTypes): void => {
-    // setOpen(true)
-    // setAction('edit')
     setselectedProduct(data)
     navigate(`/dashboard/add-product?productId=${data.id}`)
     console.log('data- in hadle edit--', data)
@@ -54,23 +52,11 @@ const ProductsPage = (): JSX.Element => {
     setOpen(false)
     console.log('result00- on save--', result)
 
-    // check the action
-    // if (action === 'edit') {
-    //   if (result.success) {
-    //     toast.success(result.message)
-    //     // refresh products
-    //     queryClient.invalidateQueries({ queryKey: ['products', page, limit] })
-    //   } else {
-    //     toast.error(result.message)
-    //   }
-    // }
-    // else
     if (action === 'delete') {
       // call delete action
       if (result.success) {
         toast.success(result.message)
         if (selectedProduct?.id !== null) {
-          // filter products
           // refresh products
           queryClient.invalidateQueries({ queryKey: ['products', page, limit] })
         }
