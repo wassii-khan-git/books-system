@@ -83,21 +83,9 @@ const dashboardNavigations = {
       ]
     },
     {
-      title: 'Orders',
-      url: 'dashboard/orders',
+      title: 'Sales',
+      url: 'dashboard/sales',
       icon: IconReceipt2,
-      isActive: false
-    },
-    {
-      title: 'Users',
-      url: 'dashboard/users',
-      icon: IconUser,
-      isActive: false
-    },
-    {
-      title: 'Queries',
-      url: 'dashboard/queries',
-      icon: IconMessageCircle,
       isActive: false
     }
     // {
