@@ -34,8 +34,15 @@ export const Companies = {
 
 // products
 export const Products = {
-  getProducts: ({ page, limit }: { page: string; limit: string }) =>
-    ipcRenderer.invoke('get-products', { page, limit }),
+  getProducts: ({
+    page,
+    limit,
+    searchTerm
+  }: {
+    page: string
+    limit: string
+    searchTerm?: string
+  }) => ipcRenderer.invoke('get-products', { page, limit, searchTerm }),
   getProductById: (productId: number) => ipcRenderer.invoke('get-product-by-id', productId),
   addProduct: (data: AddProductTypes) => ipcRenderer.invoke('add-product', data),
   updateProduct: (data: AddProductTypes) => ipcRenderer.invoke('update-product', data),

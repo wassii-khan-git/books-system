@@ -77,7 +77,15 @@ export const ProductServices = {
     }
   },
   // get products
-  getProducts: async ({ page, limit }: { page: string; limit: string }): Promise<ResponseTypes> => {
+  getProducts: async ({
+    page,
+    limit,
+    searchTerm
+  }: {
+    page: string
+    limit: string
+    searchTerm?: string
+  }): Promise<ResponseTypes> => {
     try {
       const pageNumber = Number(page)
       const limitNumber = Number(limit)
@@ -85,6 +93,27 @@ export const ProductServices = {
       // validation
       if (!pageNumber || pageNumber === undefined || !limit || limit === undefined) {
         return { success: false, message: 'Page or limit is required' + page + '--' + limit }
+      }
+      // If search Term exists in the props
+      if (searchTerm && searchTerm.length > 0) {
+        // get products
+        const products = await prisma.product.findMany({
+          where: {
+            OR: [
+              { title: { contains: searchTerm } },
+              { author: { contains: searchTerm } },
+              { publisher: { contains: searchTerm } },
+              { isbn: parseInt(searchTerm) || 0 }
+            ]
+          },
+          include: { category: true, company: true }
+        })
+        // return
+        return {
+          success: true,
+          message: 'products fetched successfully',
+          data: products
+        }
       }
 
       // pagination

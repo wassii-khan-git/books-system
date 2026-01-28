@@ -6,8 +6,11 @@ export const productsController = async (): Promise<void> => {
   // get all products
   ipcMain.handle(
     'get-products',
-    async (_event, { page, limit }: { page: string; limit: string }) => {
-      return await ProductServices.getProducts({ page, limit })
+    async (
+      _event,
+      { page, limit, searchTerm }: { page: string; limit: string; searchTerm?: string }
+    ) => {
+      return await ProductServices.getProducts({ page, limit, searchTerm })
     }
   )
   // get product by id

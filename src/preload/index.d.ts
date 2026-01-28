@@ -27,7 +27,15 @@ declare global {
       updateCompany: (data: AddCompanyTypes) => Promise<ResponseTypes>
       deleteCompany: (id: number) => Promise<ResponseTypes>
       // products
-      getProducts: ({ page, limit }) => Promise<ResponseTypes>
+      getProducts: ({
+        page,
+        limit,
+        searchTerm
+      }: {
+        page: number
+        limit: number
+        searchTerm?: string
+      }) => Promise<ResponseTypes>
       getProductById: (productId: number) => Promise<ResponseTypes>
       addProduct: (data: AddProductTypes) => Promise<ResponseTypes>
       updateProduct: (data: AddProductTypes) => Promise<ResponseTypes>
