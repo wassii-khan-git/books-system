@@ -1,6 +1,6 @@
-import { User } from 'src/generated/prisma/client'
+// src/store/use-auth-store.ts
 import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
+import { User } from 'src/generated/prisma/client'
 
 interface AuthState {
   isAuthenticated: boolean
@@ -15,31 +15,31 @@ export const useAuthStore = create<AuthState>()((set) => ({
   isAuthenticated: false,
   isLoading: true,
   user: null,
+  // set user
   setUser: (user) => set({ isAuthenticated: true, user, isLoading: false }),
+  // fetch session
   fetchSession: async () => {
+    set({ isLoading: true })
     try {
       const session = await window.api.getSession()
-      console.log('session---', session)
-      if (session !== null && session !== undefined) {
-        set({ isAuthenticated: true, user: session?.user, isLoading: false })
+      if (session?.user) {
+        set({ isAuthenticated: true, user: session.user, isLoading: false })
+      } else {
+        set({ isAuthenticated: false, user: null, isLoading: false })
       }
     } catch (error) {
-      console.log('Erroro---', error)
+      console.log('error==', error)
       set({ isAuthenticated: false, user: null, isLoading: false })
-    } finally {
-      set({ isLoading: false })
     }
   },
+  // logout
   logout: async () => {
     set({ isLoading: true })
     try {
-      const response = await window.api.logout()
-      console.log('lgoout -- response---', response)
+      await window.api.logout()
       set({ isAuthenticated: false, user: null, isLoading: false })
     } catch (error) {
-      console.log('Errorr--', error)
-      set({ isLoading: false })
-    } finally {
+      console.log('error==', error)
       set({ isLoading: false })
     }
   }
