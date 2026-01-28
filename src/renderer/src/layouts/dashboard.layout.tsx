@@ -5,8 +5,6 @@ import { JSX } from 'react'
 import { Outlet } from 'react-router-dom'
 
 export default function DashboardLayout(): JSX.Element {
-  // loading
-
   return (
     <div className="md:ml-72">
       <SidebarProvider
