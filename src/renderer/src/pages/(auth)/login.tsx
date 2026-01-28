@@ -18,9 +18,9 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
 import heroImage from '@/assets/hero.jpg'
 import { ResponseTypes } from '../../../../main/types'
-import { useAuthStore } from '@/store/auth.slice'
 import { Eye, EyeClosed } from 'lucide-react'
 import Spinner from '@/components/shared/spinner'
+import { useAuthStore } from '@/store/auth.slice'
 
 export interface UserTypes {
   id: number
