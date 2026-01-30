@@ -20,18 +20,19 @@ import { Separator } from '@/components/ui/separator'
 import { useQuery } from '@tanstack/react-query'
 import { ResponseTypes } from 'src/main/types'
 import useDebounce from '@/hooks/use-debounce'
-import { CartItem, useCartStore } from '@/store/cart.slice'
+import { useCartStore } from '@/store/cart.slice'
 import { ProductTypes } from '../(products)/columns'
 import { toast } from 'sonner'
-import InvoiceDialog from './dialog'
+import { useInvoiceStore } from '@/store/invoice.slice'
+import { useNavigate } from 'react-router-dom'
 
 // Sales Page
 const SalesPage = (): JSX.Element => {
   // search
   const [value, setValue] = useState<string>('')
 
-  // open
-  const [open, setOpen] = useState<boolean>(false)
+  // navigate
+  const navigate = useNavigate()
 
   // debounce search
   const { debounceValue } = useDebounce({ value, delay: 500 })
@@ -55,8 +56,8 @@ const SalesPage = (): JSX.Element => {
 
   const [discountPercent, setDiscountPercent] = useState<number>(0)
 
-  //  invoice data
-  const [invoiceData, setInvoiceData] = useState<any>({})
+  // add invoice
+  const addInvoice = useInvoiceStore((state) => state.addInvoice)
 
   // 1. Calculate Subtotal (Sum of all items)
   const subtotal = useMemo(() => {
@@ -93,7 +94,7 @@ const SalesPage = (): JSX.Element => {
   }
 
   useEffect(() => {
-    setInvoiceData({
+    addInvoice({
       items: cartItems,
       totals: {
         subtotal: subtotal,
@@ -102,7 +103,21 @@ const SalesPage = (): JSX.Element => {
         discount: discountPercent
       }
     })
-  }, [cartItems, subtotal, discountAmount, finalTotal, discountPercent])
+  }, [cartItems, subtotal, discountAmount, finalTotal, discountPercent, addInvoice])
+
+  const handleInvoice = (): void => {
+    addInvoice({
+      items: cartItems,
+      totals: {
+        subtotal: subtotal,
+        discountAmount: discountAmount,
+        total: finalTotal,
+        discount: discountPercent
+      }
+    })
+    // add the invoice in the db
+    navigate('/dashboard/sales/invoice')
+  }
 
   console.log('cart itesms---', cartItems)
 
@@ -336,10 +351,7 @@ const SalesPage = (): JSX.Element => {
                 className="w-full h-12 font-semibold text-base"
                 size="sm"
                 disabled={cartItems.length === 0}
-                onClick={() => {
-                  // Add your "Complete Sale" logic here
-                  setOpen(true)
-                }}
+                onClick={handleInvoice}
               >
                 <Check className="mr-2 h-5 w-5" />
                 Complete Sale
@@ -348,14 +360,6 @@ const SalesPage = (): JSX.Element => {
           </Card>
         </div>
       </div>
-      {/* Invoice Dialog */}
-      <InvoiceDialog
-        open={open}
-        onOpenChange={setOpen}
-        invoiceData={invoiceData}
-        onPrint={() => window.print()}
-        onNewSale={() => setOpen(false)}
-      />
     </div>
   )
 }
