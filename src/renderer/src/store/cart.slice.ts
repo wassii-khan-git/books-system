@@ -4,7 +4,6 @@ import { persist, createJSONStorage } from 'zustand/middleware'
 import { ProductTypes } from '@/pages/(admin)/(products)/columns'
 
 export interface CartItem extends ProductTypes {
-  quantity: number
   discount: number
   subtotal: number
 }
