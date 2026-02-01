@@ -32,7 +32,6 @@ import { ResponseTypes } from 'src/main/types'
 import { AddProductTypes } from 'src/main/services/product.services'
 
 export default function AddProductPage(): JSX.Element {
-  // query client
   // get url params
   const [searchParams] = useSearchParams()
   // navigate
@@ -67,12 +66,12 @@ export default function AddProductPage(): JSX.Element {
       originalPrice: product?.data?.originalPrice,
       discountedPrice: product?.data?.discountedPrice,
       quantity: product?.data?.quantity,
-      isbn: String(product?.data?.isbn),
+      isbn: product?.data?.isbn,
       pages: product?.data?.pages,
       language: product?.data?.language,
       publisher: product?.data?.publisher,
       inStock: product?.data?.inStock,
-      off: product?.data?.off || true
+      off: product?.data?.off || 0
     }
   })
 
@@ -185,12 +184,6 @@ export default function AddProductPage(): JSX.Element {
       console.log('product---', product)
     }
   }, [product, form])
-
-  useEffect(() => {
-    if (product?.data?.company?.categoryId) {
-      setCategoryId(product.data?.company?.categoryId)
-    }
-  }, [product])
 
   // console.log('categorgyr---iidd==', categoryId)
   // console.log('0000categories--', categories)
@@ -417,7 +410,11 @@ export default function AddProductPage(): JSX.Element {
                                 type="number"
                                 max="100"
                                 placeholder="0"
-                                onChange={(e) => onChange(parseFloat(e.target.value) || 0)}
+                                onChange={(e) => {
+                                  const val = parseInt(e.target.value) || 0
+                                  setPercentage(val)
+                                  onChange(val)
+                                }}
                                 onFocus={(e) => {
                                   if (value === 0) {
                                     e.target.select()
