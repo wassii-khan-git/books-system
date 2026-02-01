@@ -84,7 +84,7 @@ export const getColumns = ({ onEdit, onDelete }: columnsProps): ColumnDef<Produc
     cell: ({ row }) => (
       <div className="font-medium">
         <span className="bg-primary text-white rounded-sm p-1.5 text-xs">
-          {row.original?.company?.percentage + '  %'}
+          {row.original?.off || 0} %
         </span>
       </div>
     )
