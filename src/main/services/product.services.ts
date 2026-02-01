@@ -57,7 +57,7 @@ export const ProductServices = {
           originalPrice: data.originalPrice,
           quantity: data.quantity,
           discountedPrice: data.price - (data.price * data.off) / 100,
-          isbn: Number(data.isbn),
+          isbn: String(data.isbn),
           pages: data.pages,
           language: data.language,
           publisher: data.publisher as string,
@@ -103,7 +103,7 @@ export const ProductServices = {
               { title: { contains: searchTerm } },
               { author: { contains: searchTerm } },
               { publisher: { contains: searchTerm } },
-              { isbn: parseInt(searchTerm) || 0 }
+              { isbn: { contains: searchTerm } }
             ]
           },
           include: { category: true, company: true }
@@ -196,7 +196,7 @@ export const ProductServices = {
           price: data?.price,
           originalPrice: data?.originalPrice,
           quantity: data?.quantity,
-          isbn: Number(data?.isbn),
+          isbn: String(data?.isbn),
           pages: data?.pages,
           language: data?.language,
           publisher: data?.publisher,
