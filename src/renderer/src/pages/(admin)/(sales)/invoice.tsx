@@ -119,9 +119,6 @@ const InvoicePage = (): JSX.Element => {
                       Qty
                     </TableHead>
                     <TableHead className="text-xs font-bold text-gray-900 uppercase tracking-wide py-4 text-right">
-                      Disc.
-                    </TableHead>
-                    <TableHead className="text-xs font-bold text-gray-900 uppercase tracking-wide py-4 text-right">
                       Amount
                     </TableHead>
                   </TableRow>
@@ -144,9 +141,6 @@ const InvoicePage = (): JSX.Element => {
                         <span className="inline-flex items-center justify-center w-8 h-8 bg-gray-100 rounded font-semibold text-gray-900">
                           {item?.quantity}
                         </span>
-                      </TableCell>
-                      <TableCell className="py-4 text-right text-gray-600">
-                        {invoiceItems?.totals?.discountAmount > 0 ? `${item?.discount}%` : '—'}
                       </TableCell>
                       <TableCell className="py-4 text-right font-semibold text-gray-900 text-base">
                         Rs. {item?.subtotal?.toFixed(2)}
