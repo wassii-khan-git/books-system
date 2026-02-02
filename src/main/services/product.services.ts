@@ -14,7 +14,6 @@ export type AddProductTypes = {
   quantity: number
   price: number
   originalPrice: number
-  discountedPrice: number
   language: string
   isbn: string
   pages: number
@@ -36,15 +35,15 @@ export const ProductServices = {
         }
       }
 
-      const { title } = data
+      const { title, isbn } = data
 
       // Check if product already exists
       const existingProduct = await prisma.product.findFirst({
-        where: { title }
+        where: { title, isbn }
       })
 
       if (existingProduct) {
-        return { success: false, message: 'Product already exists' }
+        return { success: false, message: 'Please make sure the Title and ISBN are unique' }
       }
 
       // new product
@@ -56,7 +55,6 @@ export const ProductServices = {
           price: data.price,
           originalPrice: data.originalPrice,
           quantity: data.quantity,
-          discountedPrice: data.price - (data.price * data.off) / 100,
           isbn: String(data.isbn),
           pages: data.pages,
           language: data.language,
