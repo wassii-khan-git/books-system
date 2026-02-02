@@ -4,13 +4,14 @@ import { persist, createJSONStorage } from 'zustand/middleware'
 import { ProductTypes } from '@/pages/(admin)/(products)/columns'
 
 export interface CartItem extends ProductTypes {
-  discount: number
   subtotal: number
+  quantity: number
+  productQuantity: number
 }
 
 interface CartState {
   cartItems: CartItem[]
-  addToCart: (product: ProductTypes) => void
+  addToCart: (product: CartItem) => void
   removeFromCart: (productId: string) => void
   updateQuantity: (productId: string, quantity: number) => void
   clearCart: () => void
@@ -42,7 +43,7 @@ export const useCartStore = create<CartState>()(
           const newItem: CartItem = {
             ...product,
             quantity: 1,
-            discount: 0,
+            productQuantity: product.quantity,
             subtotal: product.price
           }
           // add to cart
