@@ -4,6 +4,7 @@ import { AuthTypes } from 'src/main/types'
 import { AddCategoryTypes } from 'src/main/services/categories.services'
 import { AddCompanyTypes } from 'src/main/services/companies.services'
 import { AddProductTypes } from 'src/main/services/product.services'
+import { AddSalesTypes } from 'src/main/services/sales.services'
 
 declare global {
   interface Window {
@@ -40,6 +41,20 @@ declare global {
       addProduct: (data: AddProductTypes) => Promise<ResponseTypes>
       updateProduct: (data: AddProductTypes) => Promise<ResponseTypes>
       deleteProduct: (id: number) => Promise<ResponseTypes>
+      // sales
+      addSales: (data: AddSalesTypes) => Promise<ResponseTypes>
+      getSalesById: (id: number) => Promise<ResponseTypes>
+      getSales: ({
+        page,
+        limit,
+        searchTerm
+      }: {
+        page: string
+        limit: string
+        searchTerm?: string
+      }) => Promise<ResponseTypes>
+      updateSales: (data: AddSalesTypes) => Promise<ResponseTypes>
+      deleteSales: (id: number) => Promise<ResponseTypes>
       // window controls
       minimizeWindow: () => Promise<void>
       closeWindow: () => Promise<void>
