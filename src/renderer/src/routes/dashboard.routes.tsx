@@ -50,7 +50,7 @@ const dashboardRoutes = [
     element: <SalesPage />
   },
   {
-    path: 'dashboard/sales/invoice',
+    path: 'dashboard/sales/invoice/:saleId',
     element: <InvoicePage />
   },
   {
