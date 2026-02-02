@@ -1,9 +1,9 @@
-import React, { JSX, useEffect, useState } from 'react'
+import React, { JSX, useCallback, useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 
-import { useForm } from 'react-hook-form'
+import { useForm, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 
 // shadcn/ui form components
@@ -64,7 +64,6 @@ export default function AddProductPage(): JSX.Element {
       description: product?.data?.description,
       price: product?.data?.price,
       originalPrice: product?.data?.originalPrice,
-      discountedPrice: product?.data?.discountedPrice,
       quantity: product?.data?.quantity,
       isbn: product?.data?.isbn,
       pages: product?.data?.pages,
@@ -76,7 +75,8 @@ export default function AddProductPage(): JSX.Element {
   })
 
   // get categoryId
-  const [categoryId, setCategoryId] = useState<number>(0)
+  const categoryId = useWatch({ control: form.control, name: 'categoryId' }) ?? 0
+
   // percentage
   const [percentage, setPercentage] = useState<number>(0)
 
@@ -104,7 +104,6 @@ export default function AddProductPage(): JSX.Element {
       console.log('result---adding--product:--', result)
       if (result.success) {
         // Reset form after successful submission
-        setCategoryId(0)
         toast.success(
           result.message || productId
             ? 'Product updated successfully'
@@ -155,7 +154,6 @@ export default function AddProductPage(): JSX.Element {
 
     if (selectedCompany?.categoryId) {
       const newCatId = selectedCompany.categoryId
-      setCategoryId(newCatId)
       setPercentage(selectedCompany?.percentage)
       // Auto-set the category field in the form as well
       form.setValue('categoryId', newCatId)
