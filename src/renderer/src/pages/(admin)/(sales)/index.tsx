@@ -20,11 +20,11 @@ import { Separator } from '@/components/ui/separator'
 import { useQuery } from '@tanstack/react-query'
 import { ResponseTypes } from 'src/main/types'
 import useDebounce from '@/hooks/use-debounce'
-import { useCartStore } from '@/store/cart.slice'
-import { ProductTypes } from '../(products)/columns'
+import { CartItem, useCartStore } from '@/store/cart.slice'
 import { toast } from 'sonner'
 import { useInvoiceStore } from '@/store/invoice.slice'
 import { useNavigate } from 'react-router-dom'
+import { AddSalesTypes } from 'src/main/services/sales.services'
 
 // Sales Page
 const SalesPage = (): JSX.Element => {
@@ -80,10 +80,24 @@ const SalesPage = (): JSX.Element => {
   }
 
   // handle add to cart
-  const handleAddToCart = (product: ProductTypes): void => {
-    addToCart(product)
-    setValue('')
-    toast.success('Product added to cart')
+  const handleAddToCart = async (product: CartItem): Promise<void> => {
+    // check if product is out of stock
+    if (product.quantity === 0) {
+      toast.error('This item is out of stock')
+      return
+      // check if product is already in cart
+    } else if (cartItems.find((item) => item.id === product.id)) {
+      toast.error(`This Item is already in your cart`)
+      return
+      // add to cart
+    } else {
+      addToCart({
+        ...product,
+        productQuantity: product.quantity
+      })
+      setValue('')
+      toast.success('Product added to cart')
+    }
   }
 
   // handle remove from cart
@@ -105,21 +119,50 @@ const SalesPage = (): JSX.Element => {
     })
   }, [cartItems, subtotal, discountAmount, finalTotal, discountPercent, addInvoice])
 
-  const handleInvoice = (): void => {
-    addInvoice({
-      items: cartItems,
-      totals: {
-        subtotal: subtotal,
-        discountAmount: discountAmount,
-        total: finalTotal,
-        discount: discountPercent
+  // handle invoice
+  const handleInvoice = async (): Promise<void> => {
+    // add in cart
+    // addInvoice({
+    //   items: cartItems,
+    //   totals: {
+    //     subtotal: subtotal,
+    //     discountAmount: discountAmount,
+    //     total: finalTotal,
+    //     discount: discountPercent
+    //   }
+    // })
+    // add in db
+    const saleData: AddSalesTypes = {
+      subTotal: subtotal,
+      tax: 0, // Add tax logic if needed
+      discount: discountAmount,
+      totalAmount: finalTotal,
+      paymentMethod: 'CASH', // You could add a dropdown for this in UI
+      items: cartItems.map((item) => ({
+        productId: Number(item.id),
+        quantity: item.quantity,
+        unitPrice: item.price,
+        productName: item.title
+      }))
+    }
+
+    try {
+      const result: ResponseTypes = await window.api?.addSales(saleData)
+      console.log('result from sales data-=--', result)
+
+      if (result.success) {
+        toast.success('Sale added successfully')
+        handleClear()
+        navigate(`/dashboard/sales/invoice/${result.data.id}`)
       }
-    })
-    // add the invoice in the db
-    navigate('/dashboard/sales/invoice')
+    } catch (error) {
+      toast.error('Sale failed')
+      console.log('error--', error)
+    }
   }
 
   console.log('cart itesms---', cartItems)
+  console.log('products---', products)
 
   return (
     <div className="flex flex-1 flex-col gap-6 p-4 lg:p-6">
@@ -180,11 +223,22 @@ const SalesPage = (): JSX.Element => {
                         <p className="font-semibold text-base truncate">{product.title}</p>
                         <p className="text-sm text-muted-foreground mt-0.5">{product.author}</p>
                         <div className="flex items-center gap-2 mt-2">
-                          <Badge className="text-xs font-normal">{product.company?.name}</Badge>
-                          {product.off > 0 && (
-                            <Badge variant="destructive" className="text-xs">
-                              {product.off}% OFF
-                            </Badge>
+                          {/* <Badge className="text-xs font-normal">{product.company?.name}</Badge> */}
+                          <Badge className="text-xs bg-emerald-600 hover:bg-emerald-700 text-white hover:text-white font-normal">
+                            {product?.quantity}{' '}
+                            <span className="ml-1  font-bold text-xs">Items</span>
+                          </Badge>
+                          {product.off > 0 && <Badge className="text-xs">{product.off}% OFF</Badge>}
+                          {/* if quantity is greater than product quantity show message out of */}
+                          {product.quantity === 0 && (
+                            <div className="flex items-center justify-center gap-2">
+                              <Badge
+                                variant="destructive"
+                                className=" text-center font-bold text-sm"
+                              >
+                                Out of Stock
+                              </Badge>
+                            </div>
                           )}
                         </div>
                       </div>
@@ -238,55 +292,62 @@ const SalesPage = (): JSX.Element => {
                     </TableCell>
                   </TableRow>
                 ) : (
-                  cartItems.map((item) => (
-                    <TableRow key={item.id}>
-                      <TableCell>
-                        <p className="font-medium line-clamp-1">{item?.title}</p>
-                        <p className="text-xs text-muted-foreground">{item?.author}</p>
-                      </TableCell>
-                      <TableCell>
-                        <Badge className="text-xs font-normal">{item?.company?.name}</Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Badge className="bg-emerald-600 text-white hover:bg-emerald-600 text-xs font-normal">
-                          {item?.category?.title}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center justify-center gap-2">
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            className="h-7 w-7"
-                            onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                          >
-                            <Minus className="h-3 w-3" />
-                          </Button>
-                          <span className="w-8 text-center font-bold text-sm">{item.quantity}</span>
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            className="h-7 w-7"
-                            onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                          >
-                            <Plus className="h-3 w-3" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-right">Rs. {item.price}</TableCell>
+                  cartItems.map((item) => {
+                    console.log('io am items inside carteisms--', item)
 
-                      <TableCell>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="text-muted-foreground hover:text-destructive"
-                          onClick={() => handleRemoveFromCart(item.id)}
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))
+                    return (
+                      <TableRow key={item.id}>
+                        <TableCell>
+                          <p className="font-medium line-clamp-1">{item?.title}</p>
+                          <p className="text-xs text-muted-foreground">{item?.author}</p>
+                        </TableCell>
+                        <TableCell>
+                          <Badge className="text-xs font-normal">{item?.company?.name}</Badge>
+                        </TableCell>
+                        <TableCell>
+                          <Badge className="bg-emerald-600 text-white hover:bg-emerald-600 text-xs font-normal">
+                            {item?.category?.title}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center justify-center gap-2">
+                            <Button
+                              variant="outline"
+                              size="icon"
+                              className="h-7 w-7"
+                              onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                            >
+                              <Minus className="h-3 w-3" />
+                            </Button>
+                            <span className="w-8 text-center font-bold text-sm">
+                              {item.quantity}
+                            </span>
+                            <Button
+                              variant="outline"
+                              size="icon"
+                              className="h-7 w-7"
+                              onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                            >
+                              <Plus className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          Rs. {item.price * item.quantity}
+                        </TableCell>
+                        <TableCell>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="text-muted-foreground hover:text-destructive"
+                            onClick={() => handleRemoveFromCart(item.id)}
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    )
+                  })
                 )}
               </TableBody>
             </Table>
