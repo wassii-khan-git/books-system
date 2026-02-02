@@ -13,14 +13,27 @@ import {
   TableRow
 } from '@/components/ui/table'
 import { CartItem } from '@/store/cart.slice'
-import { useInvoiceStore } from '@/store/invoice.slice'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
 
 const InvoicePage = (): JSX.Element => {
-  // invoice items
-  const invoiceItems = useInvoiceStore((state) => state.invoiceItems)
+  // get the sale id from the url
+  const { saleId } = useParams()
   // navigate
   const navigate = useNavigate()
+
+  const { data: invoiceInfo } = useQuery({
+    queryKey: ['sales-info', saleId],
+    queryFn: async () => {
+      const result = await window.api?.getSalesById(Number(saleId))
+      return result
+    },
+    enabled: !!saleId
+  })
+
+  console.log('saleid--', saleId)
+  console.log('invoiceInfo----', invoiceInfo)
+
   // handle print
   const handlePrint = (): void => {
     window.print()
@@ -72,14 +85,16 @@ const InvoicePage = (): JSX.Element => {
                   <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">
                     Receipt No.
                   </p>
-                  <p className="text-base font-semibold text-gray-900">#234324324</p>
+                  <p className="text-base font-semibold text-gray-900">
+                    #{invoiceInfo?.data?.receiptNo.slice(0, 8)}
+                  </p>
                 </div>
                 <div>
                   <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">
                     Date
                   </p>
                   <p className="text-base font-semibold text-gray-900">
-                    {new Date().toLocaleDateString('en-PK', {
+                    {new Date(invoiceInfo?.data?.createdAt).toLocaleDateString('en-PK', {
                       year: 'numeric',
                       month: 'short',
                       day: 'numeric'
@@ -91,7 +106,7 @@ const InvoicePage = (): JSX.Element => {
                     Time
                   </p>
                   <p className="text-base font-semibold text-gray-900">
-                    {new Date().toLocaleTimeString('en-PK', {
+                    {new Date(invoiceInfo?.data?.createdAt).toLocaleTimeString('en-PK', {
                       hour: '2-digit',
                       minute: '2-digit',
                       hour12: true
@@ -124,18 +139,20 @@ const InvoicePage = (): JSX.Element => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {invoiceItems.items?.map((item: CartItem, index: number) => (
+                  {invoiceInfo?.data?.items?.map((item: CartItem, index: number) => (
                     <TableRow key={index} className="border-b border-gray-200">
                       <TableCell className="py-4 text-gray-600 font-medium">{index + 1}</TableCell>
                       <TableCell className="py-4">
                         <div className="space-y-0.5">
-                          <p className="font-semibold text-gray-900 text-base">{item?.title}</p>
-                          <p className="text-sm text-gray-600">by {item?.author}</p>
-                          <p className="text-xs text-gray-500">ISBN: {item?.isbn}</p>
+                          <p className="font-semibold text-gray-900 text-base">
+                            {item?.product?.title}
+                          </p>
+                          <p className="text-sm text-gray-600">by {item?.product?.author}</p>
+                          <p className="text-xs text-gray-500">ISBN: {item?.product?.isbn}</p>
                         </div>
                       </TableCell>
                       <TableCell className="py-4 text-right text-gray-900 font-medium">
-                        Rs. {item?.price.toFixed(2)}
+                        Rs. {item?.unitPrice?.toFixed(2)}
                       </TableCell>
                       <TableCell className="py-4 text-center">
                         <span className="inline-flex items-center justify-center w-8 h-8 bg-gray-100 rounded font-semibold text-gray-900">
@@ -143,7 +160,7 @@ const InvoicePage = (): JSX.Element => {
                         </span>
                       </TableCell>
                       <TableCell className="py-4 text-right font-semibold text-gray-900 text-base">
-                        Rs. {item?.subtotal?.toFixed(2)}
+                        Rs. {item?.totalPrice?.toFixed(2)}
                       </TableCell>
                     </TableRow>
                   ))}
@@ -157,15 +174,15 @@ const InvoicePage = (): JSX.Element => {
                 <div className="flex justify-between items-center py-2">
                   <span className="text-gray-600 font-medium">Subtotal</span>
                   <span className="text-gray-900 font-semibold text-lg">
-                    Rs. {invoiceItems.totals?.subtotal?.toFixed(2)}
+                    Rs. {invoiceInfo?.data?.subtotal?.toFixed(2)}
                   </span>
                 </div>
 
-                {parseFloat(String(invoiceItems.totals?.discountAmount)) > 0 && (
+                {parseFloat(String(invoiceInfo?.data?.discountAmount)) > 0 && (
                   <div className="flex justify-between items-center py-2">
                     <span className="text-red-600 font-medium">Additional Discount</span>
                     <span className="text-red-600 font-semibold text-lg">
-                      - Rs. {invoiceItems.totals?.discountAmount?.toFixed(2)}
+                      - Rs. {invoiceInfo?.data?.discountAmount?.toFixed(2)}
                     </span>
                   </div>
                 )}
@@ -176,7 +193,7 @@ const InvoicePage = (): JSX.Element => {
                   <div className="flex justify-between items-center">
                     <span className="text-gray-900 font-bold text-xl">TOTAL</span>
                     <span className="text-primary font-bold text-3xl">
-                      Rs. {invoiceItems.totals?.total?.toFixed(2)}
+                      Rs. {invoiceInfo?.data?.totalAmount?.toFixed(2)}
                     </span>
                   </div>
                 </div>
@@ -203,7 +220,11 @@ const InvoicePage = (): JSX.Element => {
                   <p className="font-semibold text-gray-700 mb-2">Store Hours</p>
                   <p>Monday - Saturday: 9:00 AM - 8:00 PM</p>
                   <p>Sunday: 10:00 AM - 6:00 PM</p>
-                  <p className="mt-2 italic">Visit us at www.bookstore.com</p>
+                  <p className="mt-2 italic">
+                    <Link to={'https://www.maktaba-e-ilmiya.com'} className="text-primary">
+                      Visit us at www.bookstore.com
+                    </Link>
+                  </p>
                 </div>
               </div>
             </div>
