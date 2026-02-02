@@ -27,7 +27,6 @@ export type ProductTypes = {
   categoryId: number
   price: number
   originalPrice: number
-  discountedPrice?: number
   percentage: number
   language: string
   isbn: string
