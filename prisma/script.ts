@@ -22,7 +22,7 @@ async function main(): Promise<void> {
   }
 
   // Fetch all users with their
-  const allUsers = await prisma.user.findMany({})
+  const allUsers = await prisma.user.findMany()
   console.log('All users:', JSON.stringify(allUsers, null, 2))
 }
 

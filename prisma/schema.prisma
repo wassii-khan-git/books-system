@@ -54,22 +54,22 @@ model Company {
 
 model Product {
   id     Int    @id @default(autoincrement())
+  // basic info
   title  String 
-  author String
-  description String
+  author String?
+  description  String  @db.Text
   
   price Int
   originalPrice Int
-  discountedPrice Int
+
   quantity Int
-  isbn String?
+  isbn String
   pages Int
   
   language String
   publisher String
   inStock Boolean @default(true)
   off  Int @default(0)
-  isActive Boolean @default(true)
   
   // Foreign keys
   categoryId      Int
@@ -82,10 +82,86 @@ model Product {
   // Relations
   category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  
+  saleItems SaleItem[]
 
   // Indexes for performance
   @@index([categoryId])
   @@index([inStock])
   @@index([createdAt])
   @@map("products")
+}
+
+model Sale {
+  id    Int  @id @default(autoincrement())
+  // receipt info
+  receiptNo String @unique @default(uuid())
+  // financial info
+  subTotal Int
+  tax      Int?    @default(0)
+  discount Int    @default(0)
+  totalAmount Int
+  // status
+  status  SalesStatus @default(COMPLETED)
+  // relations
+  items SaleItem[]
+  payments Payment[]
+
+
+  // dates
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Indexes for performance
+  @@index([receiptNo])
+  @@index([status])
+  @@index([createdAt])
+
+  @@map("sales")
+}
+
+model SaleItem {
+  id    Int    @id @default(autoincrement())
+  // Foreign keys
+  saleId Int
+  productId Int
+  // basic info
+  quantity Int
+  unitPrice Int
+  totalPrice Int
+  productName String
+
+  // relations
+  sale Sale @relation(references: [id], fields: [saleId], onDelete: Cascade)
+  product Product @relation(references: [id], fields: [productId], onDelete: Cascade)
+
+  @@map("sales_items")
+}
+
+model Payment {
+  id    Int    @id @default(autoincrement())
+  // Foreign key
+  saleId Int
+  // basic info
+  amount Int
+  method PaymentMethod // cash card etc
+  reference String?  // transaction id from card machine
+  // relation
+  sale Sale @relation(references: [id],fields: [saleId])
+  // dates
+  createdAt DateTime @default(now())
+}
+
+// ENUMS
+enum SalesStatus {
+  PENDING
+  COMPLETED
+  CANCELLED
+}
+
+enum PaymentMethod {
+  CASH
+  CARD
+  EASYPAISA
+  JAZZCASH
 }
