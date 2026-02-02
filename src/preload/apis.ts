@@ -3,6 +3,7 @@ import { SignInTypes } from '../main/services/auth.services'
 import { AddCategoryTypes } from '../main/services/categories.services'
 import { AddCompanyTypes } from '../main/services/companies.services'
 import { AddProductTypes } from '../main/services/product.services'
+import { AddSalesTypes } from '../main/services/sales.services'
 
 // auths
 export const Auths = {
@@ -47,6 +48,15 @@ export const Products = {
   addProduct: (data: AddProductTypes) => ipcRenderer.invoke('add-product', data),
   updateProduct: (data: AddProductTypes) => ipcRenderer.invoke('update-product', data),
   deleteProduct: (id: number) => ipcRenderer.invoke('delete-product', id)
+}
+
+export const Sales = {
+  addSales: (data: AddSalesTypes) => ipcRenderer.invoke('add-sales', data),
+  getSalesById: (id: number) => ipcRenderer.invoke('get-sales-by-id', id),
+  getSales: ({ page, limit, searchTerm }: { page: string; limit: string; searchTerm?: string }) =>
+    ipcRenderer.invoke('get-sales', { page, limit, searchTerm }),
+  updateSales: (data: AddSalesTypes) => ipcRenderer.invoke('update-sales', data),
+  deleteSales: (id: number) => ipcRenderer.invoke('delete-sales', id)
 }
 
 // window controls
