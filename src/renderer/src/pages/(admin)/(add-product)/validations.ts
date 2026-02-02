@@ -15,7 +15,6 @@ export const productSchema = z.object({
     .max(1000, 'Description too long'),
   price: z.number().min(0.01, 'Price must be greater than 0'),
   originalPrice: z.number().min(0).optional(),
-  discountedPrice: z.number().min(0).optional(),
   quantity: z.number().int().min(0, 'Quantity must be 0 or greater').optional(),
   isbn: z
     .string()
