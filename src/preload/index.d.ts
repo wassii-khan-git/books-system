@@ -49,8 +49,8 @@ declare global {
         limit,
         searchTerm
       }: {
-        page: string
-        limit: string
+        page: number
+        limit: number
         searchTerm?: string
       }) => Promise<ResponseTypes>
       updateSales: (data: AddSalesTypes) => Promise<ResponseTypes>
