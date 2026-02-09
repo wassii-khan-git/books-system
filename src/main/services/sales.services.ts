@@ -1,3 +1,4 @@
+import { PaymentMethod } from '../../generated/prisma/enums'
 import { salesSchema } from '../../renderer/src/pages/(admin)/(sales)/sales.schema'
 import prisma from '../lib/prisma'
 import { ResponseTypes } from '../types'
@@ -8,7 +9,7 @@ export interface AddSalesTypes {
   tax: number
   discount: number
   totalAmount: number
-  paymentMethod: 'CASH' | 'CARD' | 'EASYPAISA' | 'JAZZCASH'
+  paymentMethod: PaymentMethod
   items: {
     productId: number
     quantity: number
@@ -103,12 +104,12 @@ export const SalesServices = {
         // get saless
         const saless = await prisma.sale.findMany({
           where: {
-            OR: [
-              { title: { contains: searchTerm } },
-              { author: { contains: searchTerm } },
-              { publisher: { contains: searchTerm } },
-              { isbn: { contains: searchTerm } }
-            ]
+            // OR: [
+            //   { title: { contains: searchTerm } },
+            //   { author: { contains: searchTerm } },
+            //   { publisher: { contains: searchTerm } },
+            //   { isbn: { contains: searchTerm } }
+            // ]
           },
           include: { items: true, payments: true }
         })
@@ -126,7 +127,7 @@ export const SalesServices = {
       const saless = await prisma.sale.findMany({
         skip: skip,
         take: limitNumber,
-        include: {}
+        include: { items: { include: { product: true } }, payments: true }
       })
       // total
       const total = await prisma.sale.count()
