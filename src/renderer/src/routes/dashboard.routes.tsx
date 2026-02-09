@@ -3,6 +3,7 @@ import HomePage from '@/pages/(admin)/home'
 import { Navigate } from 'react-router-dom'
 import SalesPage from '@/pages/(admin)/(sales)'
 import InvoicePage from '@/pages/(admin)/(sales)/invoice'
+import SoldItemsPage from '@/pages/(admin)/(sales)/sold-items'
 
 // imports
 const AddCategoryPage = lazy(() => import('@/pages/(admin)/(add-category)/index'))
@@ -52,6 +53,10 @@ const dashboardRoutes = [
   {
     path: 'dashboard/sales/invoice/:saleId',
     element: <InvoicePage />
+  },
+  {
+    path: 'dashboard/sales/sold-items',
+    element: <SoldItemsPage />
   },
   {
     path: '*',
