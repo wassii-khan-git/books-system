@@ -5,7 +5,7 @@ import React, { JSX, useEffect, useMemo, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Search, Plus, Minus, ShoppingCart, X, Check, Calculator } from 'lucide-react'
+import { Search, Plus, Minus, ShoppingCart, X, Check, Calculator, Store } from 'lucide-react'
 import {
   Table,
   TableBody,
@@ -17,6 +17,13 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select'
 import { useQuery } from '@tanstack/react-query'
 import { ResponseTypes } from 'src/main/types'
 import useDebounce from '@/hooks/use-debounce'
@@ -25,6 +32,7 @@ import { toast } from 'sonner'
 import { useInvoiceStore } from '@/store/invoice.slice'
 import { useNavigate } from 'react-router-dom'
 import { AddSalesTypes } from 'src/main/services/sales.services'
+import { PaymentMethod } from '../../../../../generated/prisma/enums'
 
 // Sales Page
 const SalesPage = (): JSX.Element => {
@@ -55,6 +63,7 @@ const SalesPage = (): JSX.Element => {
   })
 
   const [discountPercent, setDiscountPercent] = useState<number>(0)
+  const [paymentMethod, setPaymentMethod] = useState<string>('CASH')
 
   // add invoice
   const addInvoice = useInvoiceStore((state) => state.addInvoice)
@@ -121,23 +130,13 @@ const SalesPage = (): JSX.Element => {
 
   // handle invoice
   const handleInvoice = async (): Promise<void> => {
-    // add in cart
-    // addInvoice({
-    //   items: cartItems,
-    //   totals: {
-    //     subtotal: subtotal,
-    //     discountAmount: discountAmount,
-    //     total: finalTotal,
-    //     discount: discountPercent
-    //   }
-    // })
     // add in db
     const saleData: AddSalesTypes = {
       subTotal: subtotal,
       tax: 0, // Add tax logic if needed
       discount: discountAmount,
       totalAmount: finalTotal,
-      paymentMethod: 'CASH', // You could add a dropdown for this in UI
+      paymentMethod: PaymentMethod[paymentMethod], // Now using the selected payment method
       items: cartItems.map((item) => ({
         productId: Number(item.id),
         quantity: item.quantity,
@@ -174,15 +173,21 @@ const SalesPage = (): JSX.Element => {
             <p className="text-sm text-muted-foreground">Quick and efficient book sales</p>
           </div>
         </div>
-        <Button
-          variant="destructive"
-          onClick={handleClear}
-          disabled={cartItems.length === 0}
-          size="sm"
-        >
-          <X className="mr-2 h-4 w-4" />
-          Clear All
-        </Button>
+        <div className="flex items-center gap-3">
+          <Button onClick={() => navigate('/dashboard/sales/sold-items')} size="sm">
+            <Store className="mr-2 h-4 w-4" />
+            Sold Items
+          </Button>
+          <Button
+            variant="destructive"
+            onClick={handleClear}
+            disabled={cartItems.length === 0}
+            size="sm"
+          >
+            <X className="mr-2 h-4 w-4" />
+            Clear All
+          </Button>
+        </div>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
@@ -327,6 +332,8 @@ const SalesPage = (): JSX.Element => {
                               size="icon"
                               className="h-7 w-7"
                               onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                              // disable if quantity is greater than product quantity
+                              disabled={item.quantity >= item.productQuantity ? true : false}
                             >
                               <Plus className="h-3 w-3" />
                             </Button>
@@ -392,6 +399,26 @@ const SalesPage = (): JSX.Element => {
                 <div className="flex justify-between items-center text-destructive">
                   <span className="text-sm font-medium">Discount ({discountPercent}%):</span>
                   <span className="font-semibold">- Rs. {discountAmount.toFixed(2)}</span>
+                </div>
+
+                <Separator className="my-4" />
+
+                {/* Payment Method Select */}
+                <div className="space-y-2">
+                  <Label htmlFor="payment-method" className="text-sm font-medium">
+                    Payment Method
+                  </Label>
+                  <Select value={paymentMethod} onValueChange={setPaymentMethod}>
+                    <SelectTrigger id="payment-method" className="h-10">
+                      <SelectValue placeholder="Select payment method" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="CASH">Cash</SelectItem>
+                      <SelectItem value="CARD">Card</SelectItem>
+                      <SelectItem value="EASYPAISA">EASYPAISA</SelectItem>
+                      <SelectItem value="JazzCash">JazzCash</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <Separator className="my-4" />
