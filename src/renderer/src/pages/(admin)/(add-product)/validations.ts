@@ -7,7 +7,7 @@ export const productSchema = z.object({
   companyId: z.number().min(1, 'Company is required'),
   categoryId: z.number().min(1, 'Category is required'),
   title: z.string().min(1, 'Title is required').max(200, 'Title too long'),
-
+  location: z.string().min(1, 'Product location is required'),
   author: z.string().min(1, 'Author is required').max(100, 'Author name too long'),
   description: z
     .string()
