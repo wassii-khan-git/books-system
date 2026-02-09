@@ -70,7 +70,8 @@ export default function AddProductPage(): JSX.Element {
       language: product?.data?.language,
       publisher: product?.data?.publisher,
       inStock: product?.data?.inStock,
-      off: product?.data?.off || 0
+      off: product?.data?.off || product?.data?.company?.percentage || 0,
+      location: product?.data?.location
     }
   })
 
@@ -177,15 +178,16 @@ export default function AddProductPage(): JSX.Element {
         language: product?.data?.language,
         publisher: product?.data?.publisher,
         inStock: product?.data?.inStock,
-        off: product?.data?.off
+        off: product?.data?.off || product?.data?.company?.percentage
       })
       console.log('product---', product)
     }
-  }, [product, form])
+  }, [product, form, percentage])
 
   // console.log('categorgyr---iidd==', categoryId)
   // console.log('0000categories--', categories)
   console.log('product====', product)
+  console.log('percentage---', percentage)
 
   return (
     <div className="flex flex-1 flex-col">
@@ -401,7 +403,9 @@ export default function AddProductPage(): JSX.Element {
                         name="off"
                         render={({ field: { value, onChange, ...otherProps } }) => (
                           <FormItem>
-                            <FormLabel>Percentage (%)</FormLabel>
+                            <FormLabel>
+                              Percentage ( {percentage || product?.data?.company?.percentage}% )
+                            </FormLabel>
                             <FormControl>
                               <Input
                                 value={percentage || value}
@@ -418,6 +422,7 @@ export default function AddProductPage(): JSX.Element {
                                     e.target.select()
                                   }
                                 }}
+                                disabled={true}
                                 {...otherProps}
                               />
                             </FormControl>
@@ -503,6 +508,20 @@ export default function AddProductPage(): JSX.Element {
 
                     {/* Inventory */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {/* Place | Location */}
+                      <FormField
+                        control={form.control}
+                        name="location"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Place | Location *</FormLabel>
+                            <FormControl>
+                              <Input placeholder="Enter product place \ location" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
                       <FormField
                         control={form.control}
                         name="inStock"
