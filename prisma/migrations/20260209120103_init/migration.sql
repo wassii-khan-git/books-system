@@ -54,6 +54,7 @@ CREATE TABLE "products" (
     "publisher" TEXT NOT NULL,
     "inStock" BOOLEAN NOT NULL DEFAULT true,
     "off" INTEGER NOT NULL DEFAULT 0,
+    "location" TEXT,
     "categoryId" INTEGER NOT NULL,
     "companyId" INTEGER NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,

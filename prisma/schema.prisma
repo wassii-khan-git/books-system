@@ -53,6 +53,7 @@ model Company {
 }
 
 model Product {
+  // id
   id     Int    @id @default(autoincrement())
   // basic info
   title  String 
@@ -70,6 +71,9 @@ model Product {
   publisher String
   inStock Boolean @default(true)
   off  Int @default(0)
+
+  // location
+  location String?
   
   // Foreign keys
   categoryId      Int
