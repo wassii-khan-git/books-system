@@ -19,6 +19,7 @@ export type AddProductTypes = {
   pages: number
   inStock: boolean
   off: number
+  location: string
 }
 
 export const ProductServices = {
@@ -61,6 +62,7 @@ export const ProductServices = {
           publisher: data.publisher as string,
           inStock: data.inStock,
           off: data.off,
+          location: data.location,
           // Foreign keys
           categoryId: data.categoryId,
           companyId: data.companyId
@@ -199,7 +201,8 @@ export const ProductServices = {
           language: data?.language,
           publisher: data?.publisher,
           inStock: data?.inStock,
-          off: data?.off
+          off: data?.off,
+          location: data?.location
         }
       })
       return { success: true, message: 'product updated successfully', data: product }
