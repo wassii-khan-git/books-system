@@ -10,12 +10,13 @@ import {
   Download,
   Filter,
   Calendar,
-  DollarSign,
   ShoppingBag,
-  TrendingUp,
   Eye,
   ArrowUpDown,
-  FileText
+  FileText,
+  Trash2,
+  Trash,
+  ChevronLeft
 } from 'lucide-react'
 import {
   Table,
@@ -45,28 +46,65 @@ import {
 import { Separator } from '@/components/ui/separator'
 import { useQuery } from '@tanstack/react-query'
 import useDebounce from '@/hooks/use-debounce'
+import { toast } from 'sonner'
+import SoldItemsDialog from './delete-dialog'
+import { useNavigate } from 'react-router-dom'
 
 // Sold Items Page
 const SoldItemsPage = (): JSX.Element => {
+  // navigate
+  const navigate = useNavigate()
+
   // search term
   const [searchTerm, setSearchTerm] = useState<string>('')
 
   // get search term
   const { debounceValue } = useDebounce({ value: searchTerm, delay: 500 })
 
+  // open dialog
+  const [open, setOpen] = useState(false)
+
   // selected sale
   const [selectedSale, setSelectedSale] = useState<any>(null)
 
+  // payment state
+  const [payment, setPayment] = useState<string>('ALL')
+
   // fetch sales
   const { data: sales } = useQuery({
-    queryKey: ['sales', debounceValue],
+    queryKey: ['soldItems', debounceValue, payment],
     queryFn: async () => {
-      const result = await window.api?.getSales({ page: 1, limit: 10, searchTerm: debounceValue })
+      const result = await window.api?.getSoldItems({
+        page: 1,
+        limit: 10,
+        searchTerm: debounceValue,
+        paymentMethod: payment !== 'ALL' ? payment : undefined
+      })
       return result
     }
   })
 
-  console.log('saless----', sales)
+  // handle receipt copy
+  const handleCopyReceipt = (receiptNo: string): void => {
+    navigator.clipboard.writeText(receiptNo)
+    toast.success('Receipt number copied to clipboard')
+  }
+
+  // handle delete sale
+  const handleDeleteSale = (sale: any): void => {
+    setOpen(true)
+    setSelectedSale(sale)
+  }
+
+  // handle clear filter
+  const handleClearFilter = (): void => {
+    setSearchTerm('')
+    setPayment('')
+  }
+
+  console.log('sales----', sales)
+  console.log('payment---', payment)
+  console.log('selectedSale---', selectedSale)
 
   return (
     <div className="flex flex-1 flex-col gap-6 p-4 lg:p-6">
@@ -79,13 +117,18 @@ const SoldItemsPage = (): JSX.Element => {
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <Button variant="outline" size="sm">
-            <Download className="mr-2 h-4 w-4" />
-            Export
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={handleClearFilter}
+            disabled={searchTerm === '' && payment === ''}
+          >
+            <Filter className=" h-4 w-4" />
+            Clear Filters
           </Button>
-          <Button size="sm">
-            <FileText className="mr-2 h-4 w-4" />
-            Generate Report
+          <Button size="sm" onClick={() => navigate('/dashboard/sales')}>
+            <ChevronLeft className="mr-1 h-4 w-4" />
+            Go Back
           </Button>
         </div>
       </div>
@@ -118,11 +161,11 @@ const SoldItemsPage = (): JSX.Element => {
             </div>
 
             {/* Payment Method Filter */}
-            <div>
+            <div className="md:col-span-2">
               <Label htmlFor="payment-filter" className="text-sm font-medium mb-2 block">
                 Payment Method
               </Label>
-              <Select>
+              <Select value={payment} onValueChange={(value) => setPayment(value)}>
                 <SelectTrigger id="payment-filter" className="h-10">
                   <SelectValue />
                 </SelectTrigger>
@@ -131,13 +174,13 @@ const SoldItemsPage = (): JSX.Element => {
                   <SelectItem value="CASH">Cash</SelectItem>
                   <SelectItem value="CARD">Card</SelectItem>
                   <SelectItem value="EASYPAISA">EasyPaisa</SelectItem>
-                  <SelectItem value="JazzCash">JazzCash</SelectItem>
+                  <SelectItem value="JAZZCASH">JazzCash</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             {/* Date Filter */}
-            <div>
+            {/* <div>
               <Label htmlFor="date-filter" className="text-sm font-medium mb-2 block">
                 Date
               </Label>
@@ -153,7 +196,7 @@ const SoldItemsPage = (): JSX.Element => {
                   <SelectItem value="2024-02-06">Feb 06, 2024</SelectItem>
                 </SelectContent>
               </Select>
-            </div>
+            </div> */}
           </div>
         </CardContent>
       </Card>
@@ -194,7 +237,11 @@ const SoldItemsPage = (): JSX.Element => {
             ) : (
               sales?.data?.map((sale) => (
                 <TableRow key={sale.id} className="hover:bg-muted/50">
-                  <TableCell className="font-medium text-primary">
+                  <TableCell
+                    className="font-medium text-primary cursor-pointer"
+                    onClick={() => handleCopyReceipt(sale?.receiptNo)}
+                    title="Copy receipt number"
+                  >
                     {sale.receiptNo.slice(0, 8) + '...'}
                   </TableCell>
                   <TableCell>
@@ -239,124 +286,9 @@ const SoldItemsPage = (): JSX.Element => {
                     </span>
                   </TableCell>
                   <TableCell className="text-center">
-                    <Dialog>
-                      <DialogTrigger asChild>
-                        <Button variant="ghost" size="sm" onClick={() => setSelectedSale(sale)}>
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-                        <DialogHeader>
-                          <DialogTitle className="text-2xl">Transaction Details</DialogTitle>
-                          <DialogDescription>
-                            Invoice: {sale.invoiceNumber} | {sale.date} at {sale.time}
-                          </DialogDescription>
-                        </DialogHeader>
-
-                        {selectedSale && (
-                          <div className="space-y-6 mt-4">
-                            {/* Customer & Payment Info */}
-                            <div className="grid grid-cols-2 gap-4">
-                              <div className="space-y-2">
-                                <Label className="text-muted-foreground text-xs">
-                                  Customer Name
-                                </Label>
-                                <p className="font-semibold text-lg"></p>
-                              </div>
-                              <div className="space-y-2">
-                                <Label className="text-muted-foreground text-xs">
-                                  Payment Method
-                                </Label>
-                                <Badge></Badge>
-                              </div>
-                            </div>
-
-                            <Separator />
-
-                            {/* Items Table */}
-                            <div>
-                              <h3 className="font-semibold mb-3">Items Purchased</h3>
-                              <Table>
-                                <TableHeader>
-                                  <TableRow>
-                                    <TableHead>Book</TableHead>
-                                    <TableHead>Company</TableHead>
-                                    <TableHead>Category</TableHead>
-                                    <TableHead className="text-center">Qty</TableHead>
-                                    <TableHead className="text-right">Unit Price</TableHead>
-                                    <TableHead className="text-right">Subtotal</TableHead>
-                                  </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                  {selectedSale.items.map((item: any) => (
-                                    <TableRow key={item.id}>
-                                      <TableCell>
-                                        <p className="font-medium">{item.title}</p>
-                                        <p className="text-xs text-muted-foreground">
-                                          {item.author}
-                                        </p>
-                                      </TableCell>
-                                      <TableCell>
-                                        <Badge variant="outline" className="text-xs">
-                                          {item.company}
-                                        </Badge>
-                                      </TableCell>
-                                      <TableCell>
-                                        <Badge className="bg-emerald-600 text-white text-xs">
-                                          {item.category}
-                                        </Badge>
-                                      </TableCell>
-                                      <TableCell className="text-center font-semibold">
-                                        {item.quantity}
-                                      </TableCell>
-                                      <TableCell className="text-right">
-                                        Rs. {item.unitPrice}
-                                      </TableCell>
-                                      <TableCell className="text-right font-semibold">
-                                        Rs. {item.quantity * item.unitPrice}
-                                      </TableCell>
-                                    </TableRow>
-                                  ))}
-                                </TableBody>
-                              </Table>
-                            </div>
-
-                            <Separator />
-
-                            {/* Total Summary */}
-                            <div className="space-y-3 bg-slate-50 p-4 rounded-lg">
-                              <div className="flex justify-between items-center">
-                                <span className="text-muted-foreground">Subtotal:</span>
-                                <span className="font-semibold text-lg">Rs. </span>
-                              </div>
-
-                              <div className="flex justify-between items-center text-orange-600">
-                                <span className="font-medium">Discount:</span>
-                                <span className="font-semibold">- Rs. </span>
-                              </div>
-
-                              <Separator />
-                              <div className="flex justify-between items-center">
-                                <span className="font-bold text-lg">Total Amount:</span>
-                                <span className="text-2xl font-bold text-primary">Rs.</span>
-                              </div>
-                            </div>
-
-                            {/* Action Buttons */}
-                            <div className="flex gap-3">
-                              <Button className="flex-1">
-                                <FileText className="mr-2 h-4 w-4" />
-                                Print Invoice
-                              </Button>
-                              <Button variant="outline" className="flex-1">
-                                <Download className="mr-2 h-4 w-4" />
-                                Download PDF
-                              </Button>
-                            </div>
-                          </div>
-                        )}
-                      </DialogContent>
-                    </Dialog>
+                    <Button variant="destructive" size="sm" onClick={() => handleDeleteSale(sale)}>
+                      <Trash className="h-4 w-4 " />
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))
@@ -375,6 +307,12 @@ const SoldItemsPage = (): JSX.Element => {
           </div>
         )}
       </Card>
+      {/* Delete Dialog */}
+      <SoldItemsDialog
+        open={open}
+        onOpenChange={() => setOpen((prevState) => !prevState)}
+        sales={selectedSale}
+      />
     </div>
   )
 }
