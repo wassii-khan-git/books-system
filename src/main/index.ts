@@ -8,6 +8,7 @@ import { categoriesController } from './controllers/categories.controller'
 import { companiesController } from './controllers/companies.controller'
 import { productsController } from './controllers/products.controller'
 import { salesController } from './controllers/sales.controller'
+import { soldItemsController } from './controllers/solditems.controller'
 
 let mainWindow: BrowserWindow | null = null
 
@@ -99,6 +100,7 @@ app.whenReady().then(() => {
   companiesController()
   productsController()
   salesController()
+  soldItemsController()
 
   createWindow()
 

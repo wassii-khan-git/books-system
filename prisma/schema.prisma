@@ -151,7 +151,7 @@ model Payment {
   method PaymentMethod // cash card etc
   reference String?  // transaction id from card machine
   // relation
-  sale Sale @relation(references: [id],fields: [saleId])
+  sale Sale @relation(references: [id],fields: [saleId], onDelete: Cascade)
   // dates
   createdAt DateTime @default(now())
 }
