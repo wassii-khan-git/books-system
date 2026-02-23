@@ -4,6 +4,7 @@ import { AddCategoryTypes } from '../main/services/categories.services'
 import { AddCompanyTypes } from '../main/services/companies.services'
 import { AddProductTypes } from '../main/services/product.services'
 import { AddSalesTypes } from '../main/services/sales.services'
+import { PaymentMethod } from '../generated/prisma/enums'
 
 // auths
 export const Auths = {
@@ -57,6 +58,22 @@ export const Sales = {
     ipcRenderer.invoke('get-sales', { page, limit, searchTerm }),
   updateSales: (data: AddSalesTypes) => ipcRenderer.invoke('update-sales', data),
   deleteSales: (id: number) => ipcRenderer.invoke('delete-sales', id)
+}
+
+export const SoldItems = {
+  getSoldItems: ({
+    page,
+    limit,
+    searchTerm,
+    paymentMethod
+  }: {
+    page: number
+    limit: number
+    searchTerm?: string
+    paymentMethod?: PaymentMethod
+  }) => ipcRenderer.invoke('get-solditems', { page, limit, searchTerm, paymentMethod }),
+  // delete sold item
+  deleteSoldItem: (id: number) => ipcRenderer.invoke('delete-solditem', { id })
 }
 
 // window controls

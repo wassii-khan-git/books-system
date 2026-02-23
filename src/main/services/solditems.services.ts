@@ -1,97 +1,28 @@
 import { PaymentMethod } from '../../generated/prisma/enums'
 import { salesSchema } from '../../renderer/src/pages/(admin)/(sales)/sales.schema'
-import prisma from '../lib/prisma'
 import { ResponseTypes } from '../types'
+import prisma from '../lib/prisma'
+import { AddSalesTypes } from './sales.services'
 
-// addSalesTypes refined for the transaction
-export interface AddSalesTypes {
-  subTotal: number
-  tax: number
-  discount: number
-  totalAmount: number
-  paymentMethod: PaymentMethod
-  items: {
-    productId: number
-    quantity: number
-    unitPrice: number
-    productName: string
-  }[]
+// Sold Items Types
+export interface SoldItemsTypes {
+  page: number
+  limit: number
+  searchTerm?: string
+  paymentMethod?: PaymentMethod
 }
 
-export const SalesServices = {
-  // add sale
-  addSales: async (data: AddSalesTypes): Promise<ResponseTypes> => {
-    try {
-      // Use $transaction to ensure data integrity
-      const result = await prisma.$transaction(async (tx) => {
-        // 1. Create the Main Sale record
-        const sale = await tx.sale.create({
-          data: {
-            subTotal: data.subTotal,
-            tax: data.tax,
-            discount: data.discount,
-            totalAmount: data.totalAmount,
-            // Create the payment record at the same time
-            payments: {
-              create: {
-                amount: data.totalAmount,
-                method: data.paymentMethod
-              }
-            },
-            // Create all sale items
-            items: {
-              create: data.items.map((item) => ({
-                productId: item.productId,
-                quantity: item.quantity,
-                unitPrice: item.unitPrice,
-                totalPrice: item.unitPrice * item.quantity,
-                productName: item.productName
-              }))
-            }
-          },
-          include: { items: true, payments: true }
-        })
-
-        // 2. Update Inventory for each product
-        for (const item of data.items) {
-          const product = await tx.product.findUnique({
-            where: { id: item.productId }
-          })
-
-          if (!product || product.quantity < item.quantity) {
-            throw new Error(`Insufficient stock for ${item.productName}`)
-          }
-
-          await tx.product.update({
-            where: { id: item.productId },
-            data: {
-              quantity: {
-                decrement: item.quantity
-              }
-            }
-          })
-        }
-
-        return sale
-      })
-
-      return { success: true, message: 'Sale completed successfully', data: result }
-    } catch (error: any) {
-      console.error('Transaction Error:', error)
-      return { success: false, message: error.message || 'Failed to process sale' }
-    }
-  },
+// Sold Items Services
+export const SoldItemsServices = {
   // get saless
-  getSales: async ({
+  getSoldItems: async ({
     page,
     limit,
-    searchTerm
-  }: {
-    page: string
-    limit: string
-    searchTerm?: string
-  }): Promise<ResponseTypes> => {
+    searchTerm,
+    paymentMethod
+  }: SoldItemsTypes): Promise<ResponseTypes> => {
     try {
+      // page + limit
       const pageNumber = Number(page)
       const limitNumber = Number(limit)
 
@@ -99,46 +30,62 @@ export const SalesServices = {
       if (!pageNumber || pageNumber === undefined || !limit || limit === undefined) {
         return { success: false, message: 'Page or limit is required' + page + '--' + limit }
       }
-      // If search Term exists in the props
-      if (searchTerm && searchTerm.length > 0) {
+
+      // if paymentMethod is provided
+      if (paymentMethod) {
         // get saless
-        const saless = await prisma.sale.findMany({
+        const sales = await prisma.sale.findMany({
           where: {
-            // OR: [
-            //   { title: { contains: searchTerm } },
-            //   { author: { contains: searchTerm } },
-            //   { publisher: { contains: searchTerm } },
-            //   { isbn: { contains: searchTerm } }
-            // ]
+            payments: {
+              some: { method: paymentMethod }
+            }
           },
           include: { items: true, payments: true }
         })
         // return
         return {
           success: true,
-          message: 'sales fetched successfully',
-          data: saless
+          message: 'Sold items fetched successfully',
+          data: sales
+        }
+      }
+
+      // If search Term exists in the props
+      if (searchTerm && searchTerm.length > 0) {
+        // get saless
+        const sales = await prisma.sale.findMany({
+          where: {
+            receiptNo: searchTerm
+          },
+          include: { items: true, payments: true }
+        })
+
+        // return
+        return {
+          success: true,
+          message: 'Sold items fetched successfully',
+          data: sales
         }
       }
 
       // pagination
       const skip = Number((pageNumber - 1) * limitNumber)
-      // get saless
-      const saless = await prisma.sale.findMany({
+      // get sales
+      const sales = await prisma.sale.findMany({
         skip: skip,
         take: limitNumber,
         include: { items: { include: { product: true } }, payments: true }
       })
       // total
       const total = await prisma.sale.count()
-
+      // return
       return {
         success: true,
-        message: 'saless fetched successfully',
-        data: saless,
+        message: 'sales fetched successfully',
+        data: sales,
         pagination: {
-          page,
-          limit,
+          page: String(page),
+          limit: String(limit),
           total
         }
       }
@@ -148,7 +95,7 @@ export const SalesServices = {
     }
   },
   // get saless
-  getSalesById: async (salesId: number): Promise<ResponseTypes> => {
+  getSoldItemById: async (salesId: number): Promise<ResponseTypes> => {
     try {
       // validation
       if (!salesId || salesId === undefined || salesId === null) {
@@ -176,7 +123,7 @@ export const SalesServices = {
     }
   },
   // update sales
-  updateSales: async (data: AddSalesTypes): Promise<ResponseTypes> => {
+  updateSoldItem: async (data: AddSalesTypes): Promise<ResponseTypes> => {
     try {
       // validation
       const validation = salesSchema.safeParse(data)
@@ -216,30 +163,50 @@ export const SalesServices = {
     }
   },
   // delete sales
-  deleteSales: async (id: number): Promise<ResponseTypes> => {
+  deleteSoldItem: async (id: number): Promise<ResponseTypes> => {
     try {
       // validation
       if (!id || id === undefined || id === null) {
         return { success: false, message: 'sales id is required:--' + id }
       }
+
+      // get the sale item
+      const saleItems = await prisma.saleItem.findMany({
+        where: { id }
+      })
+
       // Check if sales already exists
       const existingsales = await prisma.sale.findUnique({
-        where: { id },
-        include: { category: true, company: true }
+        where: { id }
       })
 
       if (!existingsales) {
-        return { success: false, message: "sales doesn't exists" }
+        return { success: false, message: "Sold item record doesn't exists" }
       }
 
       // delete sales
       const sales = await prisma.sale.delete({
         where: { id }
       })
-      return { success: true, message: 'sales deleted successfully', data: sales }
+
+      // increment the quantity of product
+      await Promise.all(
+        saleItems.map((item) => {
+          return prisma.product.update({
+            where: { id: item.productId },
+            data: {
+              quantity: {
+                increment: item.quantity
+              }
+            }
+          })
+        })
+      )
+
+      return { success: true, message: 'Sold item record deleted successfully', data: sales }
     } catch (error) {
       console.log('error--', error)
-      return { success: false, message: 'Error deleting sales' + error }
+      return { success: false, message: 'Error deleting Sold item record' + error }
     }
   }
 }
