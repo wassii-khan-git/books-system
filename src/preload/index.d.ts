@@ -55,6 +55,19 @@ declare global {
       }) => Promise<ResponseTypes>
       updateSales: (data: AddSalesTypes) => Promise<ResponseTypes>
       deleteSales: (id: number) => Promise<ResponseTypes>
+      // sold items
+      getSoldItems: ({
+        page,
+        limit,
+        searchTerm,
+        paymentMethod
+      }: {
+        page: number
+        limit: number
+        searchTerm?: string
+        paymentMethod?: PaymentMethod
+      }) => Promise<ResponseTypes>
+      deleteSoldItem: (id: number) => Promise<ResponseTypes>
       // window controls
       minimizeWindow: () => Promise<void>
       closeWindow: () => Promise<void>

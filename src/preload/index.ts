@@ -1,6 +1,6 @@
 import { contextBridge, ipcRenderer } from 'electron'
 import { electronAPI } from '@electron-toolkit/preload'
-import { Auths, Categories, Companies, Products, Sales, WindowControls } from './apis'
+import { Auths, Categories, Companies, Products, Sales, SoldItems, WindowControls } from './apis'
 
 // Custom APIs for renderer
 const api = {
@@ -15,6 +15,8 @@ const api = {
   ...Products,
   // sales
   ...Sales,
+  // sold items
+  ...SoldItems,
   // window controls
   ...WindowControls
 }

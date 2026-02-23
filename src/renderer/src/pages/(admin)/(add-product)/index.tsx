@@ -178,7 +178,8 @@ export default function AddProductPage(): JSX.Element {
         language: product?.data?.language,
         publisher: product?.data?.publisher,
         inStock: product?.data?.inStock,
-        off: product?.data?.off || product?.data?.company?.percentage
+        off: product?.data?.off || product?.data?.company?.percentage,
+        location: product?.data?.location
       })
       console.log('product---', product)
     }
