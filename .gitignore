@@ -1,8 +1,22 @@
-node_modules
-dist
-out
+# Dependencies and generated build output
+node_modules/
+/dist/
+/out/
+/src/generated/prisma/
+.pnpm-store/
+.cache/
+coverage/
+*.tsbuildinfo
+
+# Local caches and logs
 .DS_Store
 .eslintcache
 *.log*
 
-/src/generated/prisma
+# Local credentials; keep the safe setup template tracked
+.env
+.env.*
+!.env.example
+.aws/
+
+.env
