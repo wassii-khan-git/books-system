@@ -37,8 +37,8 @@ export function LoginPage(): JSX.Element {
   const form = useForm<loginSchemaTypes>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: 'developer@gmail.com',
-      password: '123456'
+      email: import.meta.env.DEV ? 'developer@gmail.com' : '',
+      password: import.meta.env.DEV ? '123456' : ''
     }
   })
 
@@ -50,10 +50,7 @@ export function LoginPage(): JSX.Element {
   // auth
   const setUser = useAuthStore((state) => state.setUser)
 
-  const formSubmit = async ({ email, password }): Promise<void> => {
-    console.log('email---', email)
-    console.log('password---', password)
-
+  const formSubmit = async ({ email, password }: loginSchemaTypes): Promise<void> => {
     try {
       // Call sign in on client side
       const response: ResponseTypes = await window.api.signIn({ email, password })
