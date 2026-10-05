@@ -10,6 +10,6 @@ export default defineConfig({
     seed: 'tsx prisma/script.ts'
   },
   datasource: {
-    url: env('DATABASE_URL') // use in-memory database for development
+    url: env('DATABASE_URL')
   }
 })
