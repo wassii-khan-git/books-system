@@ -1,37 +1,28 @@
+import bcrypt from 'bcryptjs'
 import prisma from '../src/main/lib/prisma'
 
 async function main(): Promise<void> {
-  // Create a new user with a
-  const user = await prisma.user.create({
-    data: {
-      name: 'Shredded Union',
-      email: 'developer@gmail.com',
-      password: '$2a$12$i9LRleJbKfM3ypNEtX82XOuO6IGftqd/EXWWLraD5DmKBRhxie2G2'
-    }
-  })
-  console.log('Created user:', user)
+  const email = process.env.SEED_ADMIN_EMAIL
+  const password = process.env.SEED_ADMIN_PASSWORD
+  const name = process.env.SEED_ADMIN_NAME || 'Bookstore Admin'
 
-  // seed 20 categories record
-  for (let i = 0; i < 20; i++) {
-    await prisma.category.create({
-      data: {
-        title: `Category ${i + 1}`,
-        description: `Description for category ${i + 1}`
-      }
-    })
+  if (!email || !password || password === 'CHANGE_ME_BEFORE_SEEDING') {
+    throw new Error('Set SEED_ADMIN_EMAIL and a custom SEED_ADMIN_PASSWORD in .env before seeding.')
   }
 
-  // Fetch all users with their
-  const allUsers = await prisma.user.findMany()
-  console.log('All users:', JSON.stringify(allUsers, null, 2))
+  await prisma.user.upsert({
+    where: { email },
+    update: {},
+    create: { name, email, password: await bcrypt.hash(password, 12) }
+  })
+  console.log(`Administrator ready: ${email}. Existing accounts are left unchanged.`)
 }
 
 main()
-  .then(async () => {
-    await prisma.$disconnect()
+  .catch((error: unknown) => {
+    console.error(error)
+    process.exitCode = 1
   })
-  .catch(async (e) => {
-    console.error(e)
+  .finally(async () => {
     await prisma.$disconnect()
-    process.exit(1)
   })
